@@ -1,0 +1,13 @@
+.gradle
+/local.properties
+/.idea/workspace.xml
+/.idea/libraries
+.DS_Store
+/build
+
+gradlew
+build.gradle
+AltBeacon_Map.iml
+gradlew.bat
+gradle.properties
+settings.gradle
