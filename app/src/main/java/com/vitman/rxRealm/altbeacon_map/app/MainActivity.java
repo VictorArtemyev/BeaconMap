@@ -1,7 +1,6 @@
 package com.vitman.rxRealm.altbeacon_map.app;
 
 import android.app.Activity;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -58,7 +57,9 @@ public class MainActivity extends Activity implements BeaconConsumer {
 
     private BitmapHelper mBitmapHelper;
 
-    float mScale;
+    private float mScale;
+    private int mMarkerWidth;
+    private int mMarkerHeight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +70,12 @@ public class MainActivity extends Activity implements BeaconConsumer {
         mCustomers = mDataBase.getCustomers();
         mBeaconManager = BeaconManager.getInstanceForApplication(MainActivity.this);
         mBeaconManager.bind(MainActivity.this);
+
+        mMarkerWidth = (int) getResources()
+                .getDimension(R.dimen.indoor_map_marker_width);
+        mMarkerHeight = (int) getResources()
+                .getDimension(R.dimen.indoor_map_marker_width);
+
         initViews();
         setupMap();
     }
@@ -218,10 +225,10 @@ public class MainActivity extends Activity implements BeaconConsumer {
 
                 for (Map.Entry<Integer, PandaBeacon> entry : mDataBase.getPandaBeacons().entrySet()) {
                     GridLayout gridLayout = getGridLayout(getGridLayoutPositionPoint(entry.getValue()), entry.getValue().getStrenght());
-                    RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)gridLayout.getLayoutParams();
+                    RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) gridLayout.getLayoutParams();
 
-                    int columnCount = params.width / 80;
-                    int rowCount = params.height / 80;
+                    int columnCount = params.width / mMarkerWidth;
+                    int rowCount = params.height / mMarkerHeight;
                     int beaconId = entry.getKey();
                     gridLayout.setTag(beaconId);
                     gridLayout.setColumnCount(columnCount);
@@ -266,30 +273,42 @@ public class MainActivity extends Activity implements BeaconConsumer {
                         mCustomerMarkers.remove("current_user_id");
                     }
                 }
-//
-//                gridLayout.removeAllViews();
 
-
-                List<Customer>customers = new ArrayList<>();
+                List<Customer> customers = new ArrayList<>();
                 for (Customer customer : mCustomers) {
                     if (customer.getBeaconId() == beaconIdTag)
                         customers.add(customer);
                 }
 
+                RelativeLayout.LayoutParams p = (RelativeLayout.LayoutParams) gridLayout.getLayoutParams();
+                float widthMargin = p.width - mMarkerWidth * gridLayout.getColumnCount();
+                widthMargin /= gridLayout.getColumnCount() + 1;
 
-                for (int i = 0; i < gridLayout.getRowCount(); i++){
-                    for (int j = 0; j < gridLayout.getColumnCount(); j++){
-                        if (customers.size() > i * gridLayout.getRowCount() +j) {
-                            Customer customer = customers.get(i * gridLayout.getRowCount() + j);
+                float heightMargin = p.height - mMarkerHeight * gridLayout.getRowCount();
+                heightMargin /= gridLayout.getRowCount() + 1;
+
+                for (int i = 0; i < gridLayout.getRowCount(); i++) {
+                    for (int j = 0; j < gridLayout.getColumnCount(); j++) {
+                        if (customers.size() > i * gridLayout.getRowCount() + j) {
+                            int item = i * gridLayout.getRowCount() + j;
+                            Customer customer = customers.get(item);
                             ImageView marker = mCustomerMarkers.get(customer.getUserId());
                             if (marker != null) {
-                                marker.setLayoutParams(getGridLayoutParamForCustomerMarker(j, i));
+                                GridLayout.LayoutParams params = getGridLayoutParamForCustomerMarker(j, i);
+
+                                params.leftMargin = j > 0 ? (int)widthMargin/2 : (int)widthMargin;
+                                params.rightMargin = j < gridLayout.getColumnCount() -1 ? (int)widthMargin /2 : (int)widthMargin;
+
+                                params.topMargin = i > 0 ? (int)heightMargin/2 : (int)heightMargin;
+                                params.bottomMargin = i < gridLayout.getRowCount() -1 ? (int)heightMargin /2 : (int)heightMargin;
+
+                                marker.setLayoutParams(params);
                                 gridLayout.addView(marker);
                             }
                         }
                     }
                 }
-                
+
 
 //                for (Map.Entry<String, ImageView> entry : mCustomerMarkers.entrySet()) {
 //                    ImageView marker = entry.getValue();
@@ -355,28 +374,22 @@ public class MainActivity extends Activity implements BeaconConsumer {
     private GridLayout getGridLayout(Point point, double strength) {
         GridLayout gridLayout = new GridLayout(MainActivity.this);
 
-//        int width = (int) getResources().getDimension(R.dimen.guest_layout_width);
-//        int height = (int) getResources().getDimension(R.dimen.guest_layout_height);
-        int width = (int)converValueToView(strength);
-        int height = (int)converValueToView(strength);
-
-
-        width = (int)(width * Resources.getSystem().getDisplayMetrics().density);
-        height = (int)(height * Resources.getSystem().getDisplayMetrics().density);
+        int width = (int) convertValueToView(strength * 2);
+        int height = (int) convertValueToView(strength * 2);
         RelativeLayout.LayoutParams params = new RelativeLayout
                 .LayoutParams(width, height);
         params.leftMargin = point.x - width / 2;
         params.topMargin = point.y - height / 2;
         gridLayout.setLayoutParams(params);
 
-        gridLayout.setBackgroundColor(Color.argb(100,0,0,255));
+        gridLayout.setBackgroundColor(Color.argb(100, 0, 0, 255));
         return gridLayout;
     }
 
     private GridLayout.LayoutParams getGridLayoutParamForCustomerMarker(int columnSpec, int rowSpec) {
         GridLayout.LayoutParams params = new GridLayout.LayoutParams();
-        params.width = 80;
-        params.height = 80;
+        params.width = mMarkerWidth;
+        params.height = mMarkerHeight;
         params.setGravity(Gravity.CENTER);
         params.columnSpec = GridLayout.spec(columnSpec);
         params.rowSpec = GridLayout.spec(rowSpec);
@@ -395,8 +408,8 @@ public class MainActivity extends Activity implements BeaconConsumer {
 
     private Point getGridLayoutPositionPoint(PandaBeacon beacon) {
         Point point = new Point();
-        point.x = (int)convertXValueToView(beacon.getX());
-        point.y = (int)convertYValueToView(beacon.getY());
+        point.x = (int) convertXValueToView(beacon.getX());
+        point.y = (int) convertYValueToView(beacon.getY());
         return point;
     }
 
@@ -404,22 +417,21 @@ public class MainActivity extends Activity implements BeaconConsumer {
         mMapWidth = bitmap.getWidth();
         mMapHeight = bitmap.getHeight();
         mScale = mMapWidth / mOriginalMapWidth;
-        if (mScale < mMapHeight / mOriginalMapHeight)
-        {
+        if (mScale < mMapHeight / mOriginalMapHeight) {
             mScale = mMapHeight / mOriginalMapHeight;
         }
     }
 
-    private double converValueToView(double value){
+    private double convertValueToView(double value) {
         return value * mScale * 100; //Floor scale
     }
 
     private double convertXValueToView(double value) {
-        return startPositionX + converValueToView(value);
+        return startPositionX + convertValueToView(value);
     }
 
     private double convertYValueToView(double value) {
-        return startPositionY + converValueToView(value);
+        return startPositionY + convertValueToView(value);
     }
 
     private void initOriginalMapSize(Bitmap bitmap) {
