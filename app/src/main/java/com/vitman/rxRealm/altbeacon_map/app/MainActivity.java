@@ -57,6 +57,10 @@ public class MainActivity extends Activity implements BeaconConsumer {
 
     private BitmapHelper mBitmapHelper;
 
+    private float mScale;
+    private int mMarkerWidth;
+    private int mMarkerHeight;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,6 +70,12 @@ public class MainActivity extends Activity implements BeaconConsumer {
         mCustomers = mDataBase.getCustomers();
         mBeaconManager = BeaconManager.getInstanceForApplication(MainActivity.this);
         mBeaconManager.bind(MainActivity.this);
+
+        mMarkerWidth = (int) getResources()
+                .getDimension(R.dimen.indoor_map_marker_width);
+        mMarkerHeight = (int) getResources()
+                .getDimension(R.dimen.indoor_map_marker_width);
+
         initViews();
         setupMap();
     }
@@ -214,9 +224,11 @@ public class MainActivity extends Activity implements BeaconConsumer {
                 mCustomersGrids.clear();
 
                 for (Map.Entry<Integer, PandaBeacon> entry : mDataBase.getPandaBeacons().entrySet()) {
-                    GridLayout gridLayout = getGridLayout(getGridLayoutPositionPoint(entry.getValue()));
-                    int columnCount = 3;
-                    int rowCount = 3;
+                    GridLayout gridLayout = getGridLayout(getGridLayoutPositionPoint(entry.getValue()), entry.getValue().getStrenght());
+                    RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) gridLayout.getLayoutParams();
+
+                    int columnCount = params.width / mMarkerWidth;
+                    int rowCount = params.height / mMarkerHeight;
                     int beaconId = entry.getKey();
                     gridLayout.setTag(beaconId);
                     gridLayout.setColumnCount(columnCount);
@@ -243,6 +255,8 @@ public class MainActivity extends Activity implements BeaconConsumer {
         return new Func1<GridLayout, GridLayout>() {
             @Override
             public GridLayout call(GridLayout gridLayout) {
+
+                //todo:
                 Log.e(LOG_TAG, "setupCustomerMarkersOnLayoutOperation");
 
                 int beaconIdTag = (int) gridLayout.getTag();
@@ -260,30 +274,53 @@ public class MainActivity extends Activity implements BeaconConsumer {
                     }
                 }
 
-                for (Map.Entry<String, ImageView> entry : mCustomerMarkers.entrySet()) {
-                    ImageView marker = entry.getValue();
-                    if ((int) marker.getTag() == beaconIdTag) {
-                        if (gridLayout.getColumnCount() == columnNumber) {
-                            columnNumber = 0;
-                            rowNumber++;
-                        }
+                List<Customer> customers = new ArrayList<>();
+                for (Customer customer : mCustomers) {
+                    if (customer.getBeaconId() == beaconIdTag)
+                        customers.add(customer);
+                }
 
-                        if (rowNumber + 1 == gridLayout.getRowCount()) {
-                            View textView = getTextView(guestsNumber - 6);
-                            GridLayout.LayoutParams params = new GridLayout.LayoutParams();
-                            params.width = GridLayout.LayoutParams.MATCH_PARENT;
-                            params.height = GridLayout.LayoutParams.WRAP_CONTENT;
-                            params.setGravity(Gravity.CENTER);
-                            params.columnSpec = GridLayout.spec(columnNumber, 3);
-                            params.rowSpec = GridLayout.spec(rowNumber);
-                            textView.setLayoutParams(params);
-                            gridLayout.addView(textView);
-                            break;
+
+                for (int i = 0; i < gridLayout.getRowCount(); i++) {
+                    for (int j = 0; j < gridLayout.getColumnCount(); j++) {
+                        if (customers.size() > i * gridLayout.getRowCount() + j) {
+                            int item = i * gridLayout.getRowCount() + j;
+                            Customer customer = customers.get(item);
+                            ImageView marker = mCustomerMarkers.get(customer.getUserId());
+                            if (marker != null) {
+                                marker.setLayoutParams(getGridLayoutParamForCustomerMarker(j, i));
+                                marker.setBackgroundColor(Color.RED);
+                                gridLayout.addView(marker);
+                            }
                         }
-                        marker.setLayoutParams(getGridLayoutParamForCustomerMarker(columnNumber++, rowNumber));
-                        gridLayout.addView(marker);
                     }
                 }
+
+
+//                for (Map.Entry<String, ImageView> entry : mCustomerMarkers.entrySet()) {
+//                    ImageView marker = entry.getValue();
+//                    if ((int) marker.getTag() == beaconIdTag) {
+//                        if (gridLayout.getColumnCount() == columnNumber) {
+//                            columnNumber = 0;
+//                            rowNumber++;
+//                        }
+//
+//                        if (rowNumber + 1 == gridLayout.getRowCount()) {
+//                            View textView = getTextView(guestsNumber - 6);
+//                            GridLayout.LayoutParams params = new GridLayout.LayoutParams();
+//                            params.width = GridLayout.LayoutParams.MATCH_PARENT;
+//                            params.height = GridLayout.LayoutParams.WRAP_CONTENT;
+//                            params.setGravity(Gravity.CENTER);
+//                            params.columnSpec = GridLayout.spec(columnNumber, 3);
+//                            params.rowSpec = GridLayout.spec(rowNumber);
+//                            textView.setLayoutParams(params);
+//                            gridLayout.addView(textView);
+//                            break;
+//                        }
+//                        marker.setLayoutParams(getGridLayoutParamForCustomerMarker(columnNumber++, rowNumber));
+//                        gridLayout.addView(marker);
+//                    }
+//                }
                 return gridLayout;
             }
         };
@@ -321,26 +358,25 @@ public class MainActivity extends Activity implements BeaconConsumer {
 
     // Grid layout
 
-    private GridLayout getGridLayout(Point point) {
+    private GridLayout getGridLayout(Point point, double strength) {
         GridLayout gridLayout = new GridLayout(MainActivity.this);
-        int width = (int) getResources().getDimension(R.dimen.guest_layout_width);
-        int height = (int) getResources().getDimension(R.dimen.guest_layout_height);
+
+        int width = (int) convertValueToView(strength * 2);
+        int height = (int) convertValueToView(strength * 2);
         RelativeLayout.LayoutParams params = new RelativeLayout
                 .LayoutParams(width, height);
         params.leftMargin = point.x - width / 2;
         params.topMargin = point.y - height / 2;
         gridLayout.setLayoutParams(params);
 
-        gridLayout.setBackgroundColor(Color.BLUE);
+        gridLayout.setBackgroundColor(Color.argb(100, 0, 0, 255));
         return gridLayout;
     }
 
     private GridLayout.LayoutParams getGridLayoutParamForCustomerMarker(int columnSpec, int rowSpec) {
         GridLayout.LayoutParams params = new GridLayout.LayoutParams();
-        params.width = (int) getResources()
-                .getDimension(R.dimen.indoor_map_marker_width);
-        params.height = (int) getResources()
-                .getDimension(R.dimen.indoor_map_marker_height);
+        params.width = mMarkerWidth;
+        params.height = mMarkerHeight;
         params.setGravity(Gravity.CENTER);
         params.columnSpec = GridLayout.spec(columnSpec);
         params.rowSpec = GridLayout.spec(rowSpec);
@@ -359,18 +395,30 @@ public class MainActivity extends Activity implements BeaconConsumer {
 
     private Point getGridLayoutPositionPoint(PandaBeacon beacon) {
         Point point = new Point();
-        point.x = startPositionX +
-                (int) ((beacon.getX() * (mMapWidth / mOriginalMapWidth)) * 100);
-
-        point.y = startPositionY +
-                (int) ((beacon.getY() * (mMapHeight / mOriginalMapHeight)) * 100);
-
+        point.x = (int) convertXValueToView(beacon.getX());
+        point.y = (int) convertYValueToView(beacon.getY());
         return point;
     }
 
     private void initMapSize(Bitmap bitmap) {
         mMapWidth = bitmap.getWidth();
         mMapHeight = bitmap.getHeight();
+        mScale = mMapWidth / mOriginalMapWidth;
+        if (mScale < mMapHeight / mOriginalMapHeight) {
+            mScale = mMapHeight / mOriginalMapHeight;
+        }
+    }
+
+    private double convertValueToView(double value) {
+        return value * mScale * 100; //Floor scale
+    }
+
+    private double convertXValueToView(double value) {
+        return startPositionX + convertValueToView(value);
+    }
+
+    private double convertYValueToView(double value) {
+        return startPositionY + convertValueToView(value);
     }
 
     private void initOriginalMapSize(Bitmap bitmap) {
