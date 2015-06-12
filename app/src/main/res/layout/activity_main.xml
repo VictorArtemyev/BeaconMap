@@ -1,0 +1,37 @@
+<com.vitman.rxRealm.altbeacon_map.app.layout.TouchRelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/holder_layout"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+    <RelativeLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/map_layout"
+            android:layout_gravity="center"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+        <ImageView
+                android:id="@+id/map_imageView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scaleType="centerInside"/>
+
+        <net.grobas.view.PolygonImageView
+                android:id="@+id/marker_imageView"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                app:poly_shadow="true"
+                app:poly_shadow_color="@android:color/black"
+                app:poly_border="true"
+                app:poly_border_color="@color/pink"
+                app:poly_vertices="0"
+                app:poly_border_width="8dp"
+                app:poly_corner_radius="5"
+                android:visibility="gone"
+                android:background="@color/pink"/>
+    </RelativeLayout>
+</com.vitman.rxRealm.altbeacon_map.app.layout.TouchRelativeLayout>
+
