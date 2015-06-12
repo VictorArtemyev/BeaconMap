@@ -125,7 +125,7 @@ public class MainActivity extends Activity implements BeaconConsumer {
             public void call(Bitmap bitmap) {
                 setupImageOnLayout(bitmap);
                 initMapSize(bitmap);
-                createCustomerMarkersObservable();
+                customerMarkersObservable();
 //                createUserMarkerObservable();
             }
         };
@@ -145,9 +145,7 @@ public class MainActivity extends Activity implements BeaconConsumer {
     }
 
     // Fetch customers markers
-
-
-    private void createCustomerMarkersObservable() {
+    private void customerMarkersObservable() {
         Observable.from(mCustomers)
                 .flatMap(new Func1<Customer, Observable<Pair>>() {
                     @Override
@@ -166,7 +164,7 @@ public class MainActivity extends Activity implements BeaconConsumer {
                     }
                 }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(createCustomerMarkersResultSubscriber());
+                .subscribe(customerMarkersResultSubscriber());
     }
 
     private ImageView getCustomerMarker(Bitmap bitmap, Customer customer) {
@@ -186,12 +184,12 @@ public class MainActivity extends Activity implements BeaconConsumer {
         return marker;
     }
 
-    private Subscriber createCustomerMarkersResultSubscriber() {
+    private Subscriber customerMarkersResultSubscriber() {
         return new Subscriber<Pair>() {
             @Override
             public void onCompleted() {
                 initStartPositionOnMap();
-                initCustomerLayoutsOnMap();
+                setupCustomerLayoutsOnMap();
             }
 
             @Override
@@ -232,7 +230,7 @@ public class MainActivity extends Activity implements BeaconConsumer {
 
     //Setup customers layouts on map at appropriate position
 
-    private void initCustomerLayoutsOnMap() {
+    private void setupCustomerLayoutsOnMap() {
         createCustomerLayoutObservable()
                 .map(setupCustomerMarkersOnLayoutOperation())
                 .doOnNext(saveCustomerLayoutsOperation())
@@ -394,7 +392,7 @@ public class MainActivity extends Activity implements BeaconConsumer {
                     gridLayout.removeAllViews();
                     mMapLayout.removeView(gridLayout);
                 }
-                createCustomerMarkersObservable();
+                customerMarkersObservable();
             }
         });
     }
