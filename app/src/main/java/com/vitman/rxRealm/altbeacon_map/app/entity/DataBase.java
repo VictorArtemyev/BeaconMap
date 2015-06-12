@@ -49,16 +49,16 @@ public class DataBase {
 
         PandaBeacon pandaBeacon1Room1 = new PandaBeacon();
         pandaBeacon1Room1.setName("Beacon1");
-        pandaBeacon1Room1.setX(2.44);
+        pandaBeacon1Room1.setX(1.44);
         pandaBeacon1Room1.setY(2.35);
-        pandaBeacon1Room1.setStrenght(4.5);
+        pandaBeacon1Room1.setStrenght(1.5);
         pandaBeacon1Room1.setClubRoom(room1);
         pandaBeacon1Room1.setMajor(301);
         sPandaBeacons.put(pandaBeacon1Room1.getMajor(), pandaBeacon1Room1);
 
         PandaBeacon pandaBeacon2Room1 = new PandaBeacon();
         pandaBeacon2Room1.setName("Beacon2");
-        pandaBeacon2Room1.setX(2.44);
+        pandaBeacon2Room1.setX(1.44);
         pandaBeacon2Room1.setY(6.20);
         pandaBeacon2Room1.setStrenght(1.5);
         pandaBeacon2Room1.setClubRoom(room1);
@@ -67,7 +67,7 @@ public class DataBase {
 
         PandaBeacon pandaBeacon3Room1 = new PandaBeacon();
         pandaBeacon3Room1.setName("Beacon3");
-        pandaBeacon3Room1.setX(2.44);
+        pandaBeacon3Room1.setX(1.44);
         pandaBeacon3Room1.setY(10.05);
         pandaBeacon3Room1.setStrenght(1.5);
         pandaBeacon3Room1.setClubRoom(room1);
