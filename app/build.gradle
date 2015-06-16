@@ -42,5 +42,5 @@ dependencies {
     compile 'io.reactivex:rxandroid:0.24.0'
     compile 'com.squareup.picasso:picasso:2.5.2'
 
-    compile 'com.github.AlbertGrobas:PolygonImageView:3a2b07f768'
+    compile 'com.makeramen:roundedimageview:2.1.0'
 }

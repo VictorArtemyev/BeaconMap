@@ -164,7 +164,7 @@ public class DataBase {
         Customer customer10 = new Customer(avatarUrl_25, 302, "483f414e-4572-4937-ad5");
         Customer customer11 = new Customer(avatarUrl_11, 302, "483f414e-4572-4937-");
 
-        //303
+        //304
         Customer customer12 = new Customer(avatarUrl_12, 304, "483f414e-4572-4937-ad5a-38f3b337");
         Customer customer13 = new Customer(avatarUrl_13, 304, "414e-4572-4937-ad5a-38f37d2e7");
         Customer customer14 = new Customer(avatarUrl_14, 304, "f414e-4572-4937-ad7d2e7");
@@ -182,7 +182,7 @@ public class DataBase {
         //404
         Customer customer23 = new Customer(avatarUrl_23, 405, "483f414e-4572-49377d2e7");
         Customer customer24 = new Customer(avatarUrl_24, 405, "-4572-4937-ad5a-38f3b337d2e7");
-        Customer customer25 = new Customer(avatarUrl_24, 405, "483f414e-4572-4937-f3b337d2e7");
+        Customer customer25 = new Customer(avatarUrl_25, 405, "483f414e-4572-4937-f3b337d2e7");
         Customer currentUser = new Customer(avatarUrl_10, 405, "current_user_id");
 
         sCustomers.add(customer1);

@@ -3,7 +3,6 @@ package com.vitman.rxRealm.altbeacon_map.app;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -12,14 +11,15 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
 import android.view.Gravity;
-import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.*;
 import com.vitman.rxRealm.altbeacon_map.app.entity.Customer;
 import com.vitman.rxRealm.altbeacon_map.app.entity.DataBase;
 import com.vitman.rxRealm.altbeacon_map.app.entity.PandaBeacon;
 import com.vitman.rxRealm.altbeacon_map.app.layout.TouchRelativeLayout;
 import com.vitman.rxRealm.altbeacon_map.app.util.BitmapHelper;
-import net.grobas.view.PolygonImageView;
+import com.vitman.rxRealm.altbeacon_map.app.util.LayoutBuilder;
+import com.vitman.rxRealm.altbeacon_map.app.util.ViewBuilder;
 import org.altbeacon.beacon.*;
 import rx.Observable;
 import rx.Subscriber;
@@ -38,7 +38,6 @@ public class MainActivity extends Activity implements BeaconConsumer {
     private TouchRelativeLayout mHolderLayout;
     private RelativeLayout mMapLayout;
     private ImageView mMapImageView;
-    private ImageView mMarkerImageView;
 
     private int startPositionX;
     private int startPositionY;
@@ -50,9 +49,13 @@ public class MainActivity extends Activity implements BeaconConsumer {
 
     private BeaconManager mBeaconManager;
     private DataBase mDataBase;
+    private LayoutBuilder mLayoutBuilder;
+    private ViewBuilder mViewBuilder;
 
     private List<Customer> mCustomers;
-    private List<GridLayout> mCustomersGrids = new ArrayList<>();
+    private Map<Integer, PandaBeacon> mBeacons;
+    //    private List<GridLayout> mCustomersLayouts = new ArrayList<>();
+    private List<LinearLayout> mCustomersLayouts = new ArrayList<>();
     private Map<String, ImageView> mCustomerMarkers = new HashMap<>();
 
     private BitmapHelper mBitmapHelper;
@@ -68,6 +71,7 @@ public class MainActivity extends Activity implements BeaconConsumer {
         mDataBase = DataBase.getInstance();
         mBitmapHelper = new BitmapHelper();
         mCustomers = mDataBase.getCustomers();
+        mBeacons = mDataBase.getPandaBeacons();
         mBeaconManager = BeaconManager.getInstanceForApplication(MainActivity.this);
         mBeaconManager.bind(MainActivity.this);
 
@@ -101,7 +105,6 @@ public class MainActivity extends Activity implements BeaconConsumer {
     private void initViews() {
         mHolderLayout = (TouchRelativeLayout) findViewById(R.id.holder_layout);
         mMapLayout = (RelativeLayout) findViewById(R.id.map_layout);
-        mMarkerImageView = (ImageView) findViewById(R.id.marker_imageView);
         mMapImageView = (ImageView) findViewById(R.id.map_imageView);
     }
 
@@ -136,22 +139,8 @@ public class MainActivity extends Activity implements BeaconConsumer {
                 setupImageOnLayout(bitmap);
                 initMapSize(bitmap);
                 customerMarkersObservable();
-//                createUserMarkerObservable();
             }
         };
-    }
-
-    private void createUserMarkerObservable() {
-        Observable.create(createUserMarkerSubscribe())
-                .map(createGrayscaleBitmapOperation())
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Bitmap>() {
-                    @Override
-                    public void call(Bitmap bitmap) {
-                        setupUserMarkerOnMap(bitmap);
-                    }
-                });
     }
 
     // Fetch customers markers
@@ -167,7 +156,12 @@ public class MainActivity extends Activity implements BeaconConsumer {
                                 new Func2<Bitmap, Customer, Pair>() {
                                     @Override
                                     public Pair call(Bitmap bitmap, Customer customer) {
-                                        ImageView marker = getCustomerMarker(bitmap, customer);
+
+                                        Bitmap greyBitmap = mBitmapHelper.getGrayscaleBitmap(bitmap);
+                                        ImageView marker = mViewBuilder
+                                                .getMarker(greyBitmap, customer.getUserId(), mMarkerWidth);
+                                        marker.setTag(customer.getBeaconId());
+
                                         return new Pair(customer.getUserId(), marker);
                                     }
                                 });
@@ -175,23 +169,6 @@ public class MainActivity extends Activity implements BeaconConsumer {
                 }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(customerMarkersResultSubscriber());
-    }
-
-    private ImageView getCustomerMarker(Bitmap bitmap, Customer customer) {
-        PolygonImageView marker = new PolygonImageView(MainActivity.this);
-        Bitmap greyBitmap = mBitmapHelper.getGrayscaleBitmap(bitmap);
-        marker.setBorder(true);
-        if (customer.getUserId().equals("current_user_id")) {
-            marker.setBorderColorResource(R.color.pink);
-        } else {
-            marker.setBorderColorResource(R.color.black);
-        }
-        marker.setBorderWidth(8f);
-        marker.setCornerRadius(5f);
-        marker.setVertices(0);
-        marker.setImageBitmap(greyBitmap);
-        marker.setTag(customer.getBeaconId());
-        return marker;
     }
 
     private Subscriber customerMarkersResultSubscriber() {
@@ -215,17 +192,33 @@ public class MainActivity extends Activity implements BeaconConsumer {
         };
     }
 
+    //Setup customers layouts on map at appropriate position
+
+    private void setupCustomerLayoutsOnMap() {
+        createCustomerLayoutObservable()
+                .map(setupCustomerMarkersOnLayoutOperation())
+                .doOnNext(saveCustomerLayoutsOperation())
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(customerLayoutResultSubscriber());
+    }
+
     private Observable<GridLayout> createCustomerLayoutObservable() {
         return Observable.create(new Observable.OnSubscribe<GridLayout>() {
             @Override
             public void call(Subscriber<? super GridLayout> subscriber) {
                 Log.e(LOG_TAG, "createCustomerLayoutObservable " + Thread.currentThread().getName());
 
-                mCustomersGrids.clear();
+                mCustomersLayouts.clear();
 
                 for (Map.Entry<Integer, PandaBeacon> entry : mDataBase.getPandaBeacons().entrySet()) {
-                    GridLayout gridLayout = getGridLayout(getGridLayoutPositionPoint(entry.getValue()), entry.getValue().getStrenght());
-                    RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) gridLayout.getLayoutParams();
+                    PandaBeacon beacon = entry.getValue();
+                    Point positionPoint = getPointPositionByBeacon(beacon);
+                    double strength = beacon.getStrenght();
+//                    GridLayout gridLayout = getGridLayoutWithRelativeLayoutParams(positionPoint, strength);
+                    GridLayout gridLayout = mLayoutBuilder.getGridLayoutWithLinearLayoutParams(strength);
+//                    RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) gridLayout.getLayoutParams();
+                    LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) gridLayout.getLayoutParams();
 
                     int columnCount = params.width / mMarkerWidth;
                     int rowCount = params.height / mMarkerHeight;
@@ -240,119 +233,126 @@ public class MainActivity extends Activity implements BeaconConsumer {
         });
     }
 
-    //Setup customers layouts on map at appropriate position
-
-    private void setupCustomerLayoutsOnMap() {
-        createCustomerLayoutObservable()
-                .map(setupCustomerMarkersOnLayoutOperation())
-                .doOnNext(saveCustomerLayoutsOperation())
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(customerLayoutResultSubscriber());
-    }
-
-    private Func1<GridLayout, GridLayout> setupCustomerMarkersOnLayoutOperation() {
-        return new Func1<GridLayout, GridLayout>() {
+    private Func1<GridLayout, LinearLayout> setupCustomerMarkersOnLayoutOperation() {
+        return new Func1<GridLayout, LinearLayout>() {
             @Override
-            public GridLayout call(GridLayout gridLayout) {
+            public LinearLayout call(GridLayout gridLayout) {
 
-                //todo:
                 Log.e(LOG_TAG, "setupCustomerMarkersOnLayoutOperation");
 
                 int beaconIdTag = (int) gridLayout.getTag();
-                int columnNumber = 0;
-                int rowNumber = 0;
-                int guestsNumber = mCustomerMarkers.size();
-                Log.e(LOG_TAG, "" + mCustomerMarkers.size());
-                if (mCustomerMarkers.containsKey("current_user_id")) {
-                    ImageView userMarker = mCustomerMarkers.get("current_user_id");
-                    if ((int) userMarker.getTag() == beaconIdTag) {
-                        userMarker.setLayoutParams(getGridLayoutParamForCustomerMarker(columnNumber, rowNumber));
-                        gridLayout.addView(userMarker);
-                        columnNumber++;
-                        mCustomerMarkers.remove("current_user_id");
-                    }
-                }
 
                 List<Customer> customers = new ArrayList<>();
                 for (Customer customer : mCustomers) {
-                    if (customer.getBeaconId() == beaconIdTag)
+                    if (customer.getBeaconId() == beaconIdTag) {
                         customers.add(customer);
+                        if (customer.getUserId().equals("current_user_id")) {
+                            Collections.swap(customers, 0, customers.size() - 1);
+                        }
+                    }
                 }
 
-                RelativeLayout.LayoutParams p = (RelativeLayout.LayoutParams) gridLayout.getLayoutParams();
-                float widthMargin = p.width - mMarkerWidth * gridLayout.getColumnCount();
+//                RelativeLayout.LayoutParams param = (RelativeLayout.LayoutParams) gridLayout.getLayoutParams();
+                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) gridLayout.getLayoutParams();
+
+                float widthMargin = params.width - mMarkerWidth * gridLayout.getColumnCount();
                 widthMargin /= gridLayout.getColumnCount() + 1;
 
-                float heightMargin = p.height - mMarkerHeight * gridLayout.getRowCount();
+                float heightMargin = params.height - mMarkerHeight * gridLayout.getRowCount();
                 heightMargin /= gridLayout.getRowCount() + 1;
 
-                for (int i = 0; i < gridLayout.getRowCount(); i++) {
-                    for (int j = 0; j < gridLayout.getColumnCount(); j++) {
-                        if (customers.size() > i * gridLayout.getRowCount() + j) {
-                            int item = i * gridLayout.getRowCount() + j;
+                LinearLayout linearLayout = mLayoutBuilder.getLinearLayout();
+
+                TextView zoneTitle = mViewBuilder.getZoneTitleTextView(customers.get(0).getBeaconId());
+
+                linearLayout.addView(zoneTitle);
+
+                for (int row = 0; row < gridLayout.getRowCount(); row++) {
+                    for (int column = 0; column < gridLayout.getColumnCount(); column++) {
+                        int customerRemains = customers.size() - gridLayout.getChildCount();
+                        if (row + 1 == gridLayout.getRowCount() && customerRemains > 0) {
+                            TextView textView = mViewBuilder.getCustomerRemainsTextView(customerRemains);
+
+                            GridLayout.LayoutParams param =new GridLayout.LayoutParams();
+                            param.height = GridLayout.LayoutParams.MATCH_PARENT;
+                            param.width = GridLayout.LayoutParams.MATCH_PARENT;
+param.setMargins(20, 20, 20 , 20);
+                            param.setGravity(Gravity.CENTER);
+                            param.columnSpec = GridLayout.spec(column, gridLayout.getColumnCount());
+                            param.rowSpec = GridLayout.spec(row);
+                            textView.setLayoutParams(param);
+
+                            gridLayout.addView(textView);
+                            break;
+                        }
+
+                        int item = row * gridLayout.getRowCount() + column;
+                        if (customers.size() > item) {
                             Customer customer = customers.get(item);
                             ImageView marker = mCustomerMarkers.get(customer.getUserId());
                             if (marker != null) {
-                                GridLayout.LayoutParams params = getGridLayoutParamForCustomerMarker(j, i);
+                                GridLayout.LayoutParams markerParams = mLayoutBuilder
+                                        .getGridLayoutParamForMarker(mMarkerWidth, mMarkerHeight, column, row);
+                                markerParams.leftMargin = column > 0 ?
+                                        (int) widthMargin / 2 : (int) widthMargin;
 
-                                params.leftMargin = j > 0 ? (int)widthMargin/2 : (int)widthMargin;
-                                params.rightMargin = j < gridLayout.getColumnCount() -1 ? (int)widthMargin /2 : (int)widthMargin;
+                                markerParams.rightMargin = column < gridLayout.getColumnCount() - 1 ?
+                                        (int) widthMargin / 2 : (int) widthMargin;
 
-                                params.topMargin = i > 0 ? (int)heightMargin/2 : (int)heightMargin;
-                                params.bottomMargin = i < gridLayout.getRowCount() -1 ? (int)heightMargin /2 : (int)heightMargin;
+                                markerParams.topMargin = row > 0 ?
+                                        (int) heightMargin / 2 : (int) heightMargin;
 
-                                marker.setLayoutParams(params);
+                                markerParams.bottomMargin = row < gridLayout.getRowCount() - 1 ?
+                                        (int) heightMargin / 2 : (int) heightMargin;
+                                marker.setLayoutParams(markerParams);
                                 gridLayout.addView(marker);
                             }
                         }
                     }
                 }
+                linearLayout.addView(gridLayout);
+                int remainsCustomers = customers.size() - gridLayout.getChildCount();
+                if (remainsCustomers > 0) {
+                    TextView customerRemainsTextView = mViewBuilder.getCustomerRemainsTextView
+                            (remainsCustomers);
+                    linearLayout.addView(customerRemainsTextView);
+                }
 
-
-//                for (Map.Entry<String, ImageView> entry : mCustomerMarkers.entrySet()) {
-//                    ImageView marker = entry.getValue();
-//                    if ((int) marker.getTag() == beaconIdTag) {
-//                        if (gridLayout.getColumnCount() == columnNumber) {
-//                            columnNumber = 0;
-//                            rowNumber++;
-//                        }
-//
-//                        if (rowNumber + 1 == gridLayout.getRowCount()) {
-//                            View textView = getTextView(guestsNumber - 6);
-//                            GridLayout.LayoutParams params = new GridLayout.LayoutParams();
-//                            params.width = GridLayout.LayoutParams.MATCH_PARENT;
-//                            params.height = GridLayout.LayoutParams.WRAP_CONTENT;
-//                            params.setGravity(Gravity.CENTER);
-//                            params.columnSpec = GridLayout.spec(columnNumber, 3);
-//                            params.rowSpec = GridLayout.spec(rowNumber);
-//                            textView.setLayoutParams(params);
-//                            gridLayout.addView(textView);
-//                            break;
-//                        }
-//                        marker.setLayoutParams(getGridLayoutParamForCustomerMarker(columnNumber++, rowNumber));
-//                        gridLayout.addView(marker);
-//                    }
-//                }
-                return gridLayout;
+                linearLayout.setTag(beaconIdTag);
+                return linearLayout;
             }
         };
     }
 
-    private Action1<GridLayout> saveCustomerLayoutsOperation() {
-        return new Action1<GridLayout>() {
+    private Action1<LinearLayout> saveCustomerLayoutsOperation() {
+        return new Action1<LinearLayout>() {
             @Override
-            public void call(GridLayout gridLayout) {
-                mCustomersGrids.add(gridLayout);
+            public void call(LinearLayout gridLayout) {
+                mCustomersLayouts.add(gridLayout);
             }
         };
     }
 
-    private Subscriber<GridLayout> customerLayoutResultSubscriber() {
-        Subscriber<GridLayout> result = new Subscriber<GridLayout>() {
+    private Subscriber<LinearLayout> customerLayoutResultSubscriber() {
+        Subscriber<LinearLayout> result = new Subscriber<LinearLayout>() {
             @Override
             public void onCompleted() {
                 Log.e(LOG_TAG, "On completed " + Thread.currentThread().getName());
+                for (LinearLayout linearLayout : mCustomersLayouts) {
+                    final LinearLayout layout = linearLayout;
+                    linearLayout.getViewTreeObserver().addOnGlobalLayoutListener
+                            (new ViewTreeObserver.OnGlobalLayoutListener() {
+                                @Override
+                                public void onGlobalLayout() {
+                                    int beaconId = (int) layout.getTag();
+                                    PandaBeacon beacon = mBeacons.get(beaconId);
+                                    Point positionPoint = getPointPositionByBeacon(beacon);
+                                    layout.setTranslationX(positionPoint.x - layout.getWidth() / 2);
+                                    layout.setTranslationY(positionPoint.y - layout.getHeight() / 2);
+                                    layout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                                }
+                            });
+                }
             }
 
             @Override
@@ -361,52 +361,15 @@ public class MainActivity extends Activity implements BeaconConsumer {
             }
 
             @Override
-            public void onNext(GridLayout gridLayout) {
+            public void onNext(LinearLayout linearLayout) {
                 Log.e(LOG_TAG, "On next");
-                mMapLayout.addView(gridLayout);
+                mMapLayout.addView(linearLayout);
             }
         };
         return result;
     }
 
-    // Grid layout
-
-    private GridLayout getGridLayout(Point point, double strength) {
-        GridLayout gridLayout = new GridLayout(MainActivity.this);
-
-        int width = (int) convertValueToView(strength * 2);
-        int height = (int) convertValueToView(strength * 2);
-        RelativeLayout.LayoutParams params = new RelativeLayout
-                .LayoutParams(width, height);
-        params.leftMargin = point.x - width / 2;
-        params.topMargin = point.y - height / 2;
-        gridLayout.setLayoutParams(params);
-
-        gridLayout.setBackgroundColor(Color.argb(100, 0, 0, 255));
-        return gridLayout;
-    }
-
-    private GridLayout.LayoutParams getGridLayoutParamForCustomerMarker(int columnSpec, int rowSpec) {
-        GridLayout.LayoutParams params = new GridLayout.LayoutParams();
-        params.width = mMarkerWidth;
-        params.height = mMarkerHeight;
-        params.setGravity(Gravity.CENTER);
-        params.columnSpec = GridLayout.spec(columnSpec);
-        params.rowSpec = GridLayout.spec(rowSpec);
-        return params;
-    }
-
-    private TextView getTextView(int customerNumber) {
-        TextView textView = new TextView(MainActivity.this);
-        textView.setTextColor(Color.BLACK);
-        textView.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.TOP);
-        textView.setText("+" + customerNumber + " more");
-        textView.setBackgroundColor(Color.BLUE);
-        textView.setTextSize(getResources().getDimension(R.dimen.text_size));
-        return textView;
-    }
-
-    private Point getGridLayoutPositionPoint(PandaBeacon beacon) {
+    private Point getPointPositionByBeacon(PandaBeacon beacon) {
         Point point = new Point();
         point.x = (int) convertXValueToView(beacon.getX());
         point.y = (int) convertYValueToView(beacon.getY());
@@ -420,10 +383,17 @@ public class MainActivity extends Activity implements BeaconConsumer {
         if (mScale < mMapHeight / mOriginalMapHeight) {
             mScale = mMapHeight / mOriginalMapHeight;
         }
+
+        //TODO: do some refactor
+        mMarkerWidth = (int) mMapWidth / 14;
+        mMarkerHeight = mMarkerWidth;
+
+        mLayoutBuilder = new LayoutBuilder(MainActivity.this, mScale);
+        mViewBuilder = new ViewBuilder(MainActivity.this);
     }
 
     private double convertValueToView(double value) {
-        return value * mScale * 100; //Floor scale
+        return (value * mScale * 100); //Floor scale
     }
 
     private double convertXValueToView(double value) {
@@ -437,31 +407,6 @@ public class MainActivity extends Activity implements BeaconConsumer {
     private void initOriginalMapSize(Bitmap bitmap) {
         mOriginalMapWidth = bitmap.getWidth();
         mOriginalMapHeight = bitmap.getHeight();
-    }
-
-    private void setupUserMarkerOnMap(Bitmap bitmap) {
-        mMarkerImageView.setVisibility(View.VISIBLE);
-        mMarkerImageView.setImageBitmap(bitmap);
-        translateMarker(startPositionX, startPositionY);
-
-        mMarkerImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                for (GridLayout gridLayout : mCustomersGrids) {
-                    Log.e(LOG_TAG, "W - " + gridLayout.getWidth() + " H - " + gridLayout.getHeight() + " Tag - " + gridLayout.getTag());
-                    gridLayout.removeAllViews();
-                    mMapLayout.removeView(gridLayout);
-                }
-                customerMarkersObservable();
-            }
-        });
-    }
-
-    private void translateMarker(int x, int y) {
-        Point markerCenter = new Point(mMarkerImageView.getWidth() / 2, mMarkerImageView.getHeight() / 2);
-        mMarkerImageView.setTranslationX(x - markerCenter.x);
-        mMarkerImageView.setTranslationY(y - markerCenter.y);
     }
 
     private void initStartPositionOnMap() {
@@ -553,7 +498,6 @@ public class MainActivity extends Activity implements BeaconConsumer {
                                 int x = getMarkerCurrentPositionX(entry.getValue());
                                 int y = getMarkerCurrentPositionY(entry.getValue());
                                 Log.e(LOG_TAG, "X - " + x + " Y - " + y);
-                                translateMarker(x, y);
                             }
                         }
                     }
