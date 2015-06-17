@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.graphics.PointF;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
@@ -14,6 +16,8 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.*;
+
+import com.vitman.rxRealm.altbeacon_map.app.entity.ClubRoom;
 import com.vitman.rxRealm.altbeacon_map.app.entity.Customer;
 import com.vitman.rxRealm.altbeacon_map.app.entity.DataBase;
 import com.vitman.rxRealm.altbeacon_map.app.entity.PandaBeacon;
@@ -214,15 +218,14 @@ public class MainActivity extends Activity implements BeaconConsumer {
 
                 for (Map.Entry<Integer, PandaBeacon> entry : mDataBase.getPandaBeacons().entrySet()) {
                     PandaBeacon beacon = entry.getValue();
-                    Point positionPoint = getPointPositionByBeacon(beacon);
-                    double strength = beacon.getStrenght();
 //                    GridLayout gridLayout = getGridLayoutWithRelativeLayoutParams(positionPoint, strength);
-                    GridLayout gridLayout = mLayoutBuilder.getGridLayoutWithLinearLayoutParams(strength);
+                    GridLayout gridLayout = mLayoutBuilder.getGridLayoutWithLinearLayoutParams(beacon);
 //                    RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) gridLayout.getLayoutParams();
                     LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) gridLayout.getLayoutParams();
 
                     int columnCount = params.width / mMarkerWidth;
                     int rowCount = params.height / mMarkerHeight;
+
                     int beaconId = entry.getKey();
                     gridLayout.setTag(beaconId);
                     gridLayout.setColumnCount(columnCount);
@@ -252,6 +255,22 @@ public class MainActivity extends Activity implements BeaconConsumer {
                         }
                     }
                 }
+
+                int m = gridLayout.getColumnCount();
+                int m2 = gridLayout.getRowCount();
+
+                if (gridLayout.getColumnCount() > customers.size()) {
+                    gridLayout.setColumnCount(customers.size());
+                    gridLayout.setRowCount(1);
+                }
+
+                if (gridLayout.getRowCount() >  customers.size() / gridLayout.getColumnCount()) {
+                    gridLayout.setRowCount((int) Math.ceil((double)customers.size() / gridLayout.getColumnCount()));
+                }
+
+                int m3 = gridLayout.getColumnCount();
+                int m4 = gridLayout.getRowCount();
+
 //                RelativeLayout.LayoutParams param = (RelativeLayout.LayoutParams) gridLayout.getLayoutParams();
                 LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) gridLayout.getLayoutParams();
 
@@ -260,6 +279,9 @@ public class MainActivity extends Activity implements BeaconConsumer {
 
                 float heightMargin = params.height - mMarkerHeight * gridLayout.getRowCount();
                 heightMargin /= gridLayout.getRowCount() + 1;
+
+//                widthMargin = 0;
+//                heightMargin = 0;
 
                 LinearLayout linearLayout = mLayoutBuilder.getLinearLayout();
 
@@ -272,23 +294,25 @@ public class MainActivity extends Activity implements BeaconConsumer {
                     for (int column = 0; column < gridLayout.getColumnCount(); column++) {
 
                         int customerRemains = customers.size() - gridLayout.getChildCount();
-                        if (row + 1 == gridLayout.getRowCount() && customerRemains > 0) {
-                            TextView textView = mViewBuilder.getCustomerRemainsTextView(customerRemains);
+//                        if (row + 1 == gridLayout.getRowCount() && customerRemains > 0) {
+//                            TextView textView = mViewBuilder.getCustomerRemainsTextView(customerRemains);
+//
+//                            GridLayout.LayoutParams param =new GridLayout.LayoutParams();
+//                            param.height = GridLayout.LayoutParams.MATCH_PARENT;
+//                            param.width = GridLayout.LayoutParams.MATCH_PARENT;
+//                            param.setGravity(Gravity.CENTER);
+//                            param.columnSpec = GridLayout.spec(column, gridLayout.getColumnCount());
+//                            param.rowSpec = GridLayout.spec(row);
+//                            textView.setLayoutParams(param);
+//                            gridLayout.addView(textView);
+//                            break;
+//                        }
 
-                            GridLayout.LayoutParams param =new GridLayout.LayoutParams();
-                            param.height = GridLayout.LayoutParams.MATCH_PARENT;
-                            param.width = GridLayout.LayoutParams.MATCH_PARENT;
-                            param.setGravity(Gravity.CENTER);
-                            param.columnSpec = GridLayout.spec(column, gridLayout.getColumnCount());
-                            param.rowSpec = GridLayout.spec(row);
-                            textView.setLayoutParams(param);
-                            gridLayout.addView(textView);
-                            break;
-                        }
-
-                        int item = row * gridLayout.getRowCount() + column;
+                        int item = row * gridLayout.getColumnCount() + column;
+                        Log.e("User", item + " " +gridLayout.getTag());
                         if (customers.size() > item) {
                             Customer customer = customers.get(item);
+
                             ImageView marker = mCustomerMarkers.get(customer.getUserId());
                             if (marker != null) {
                                 GridLayout.LayoutParams markerParams = mLayoutBuilder
@@ -339,9 +363,37 @@ public class MainActivity extends Activity implements BeaconConsumer {
                                 public void onGlobalLayout() {
                                     int beaconId = (int) layout.getTag();
                                     PandaBeacon beacon = mBeacons.get(beaconId);
-                                    Point positionPoint = getPointPositionByBeacon(beacon);
-                                    layout.setTranslationX(positionPoint.x - layout.getWidth() / 2);
-                                    layout.setTranslationY(positionPoint.y - layout.getHeight() / 2);
+
+                                    ClubRoom room = beacon.getClubRoom();
+
+                                    float greatestXValue = room.getPoints().get(0).x;
+                                    float greatestYValue = room.getPoints().get(0).y;
+                                    float smallestXValue = greatestXValue;
+                                    float smallestYValue = greatestYValue;
+
+                                    for(PointF point : room.getPoints())
+                                    {
+                                        greatestXValue = Math.max(greatestXValue, point.x);
+                                        greatestYValue = Math.max(greatestYValue, point.y);
+                                        smallestXValue = Math.min(smallestXValue, point.x);
+                                        smallestYValue = Math.min(smallestYValue, point.y);
+                                    }
+
+                                    Rect roomRect = new Rect();
+                                    roomRect.left = (int) convertValueToView(smallestXValue);
+                                    roomRect.top = (int) convertValueToView(smallestYValue);
+                                    roomRect.right = (int) convertValueToView(greatestXValue);
+                                    roomRect.bottom = (int) convertValueToView(greatestYValue);
+
+                                    Rect beaconRect = new Rect();
+                                    beaconRect.left = Math.max((int) convertValueToView(beacon.getX() - beacon.getStrenght()), roomRect.left);
+                                    beaconRect.top = Math.max((int) convertValueToView(beacon.getY() - beacon.getStrenght()), roomRect.top);
+                                    beaconRect.right = Math.min((int) convertValueToView(beacon.getX() + beacon.getStrenght()), roomRect.right);
+                                    beaconRect.bottom = Math.min((int) convertValueToView(beacon.getY() + beacon.getStrenght()), roomRect.bottom);
+
+
+                                    layout.setTranslationX(beaconRect.left);
+                                    layout.setTranslationY(beaconRect.top + startPositionY);
                                     layout.setVisibility(View.VISIBLE);
                                     layout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                                 }
