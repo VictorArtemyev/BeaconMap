@@ -32,85 +32,157 @@ public class DataBase {
     }
 
     private void initMapFloor() {
+        // Devabit map
         sFloor = new ClubFloor();
         sFloor.setMapScale(100);
-        sFloor.setWidth(1243);
-        sFloor.setHeight(1338);
+        sFloor.setWidth(1397);
+        sFloor.setHeight(1327);
 
         // ROOM 1
 
         ClubRoom room1 = new ClubRoom();
         room1.setIdent(1);
-        room1.getPoints().add(new PointF(0.16f, 0.48f));
-        room1.getPoints().add(new PointF(5.79f, 0.48f));
-        room1.getPoints().add(new PointF(0.16f, 12.41f));
-        room1.getPoints().add(new PointF(5.79f, 12.41f));
+        room1.getPoints().add(new PointF(6.44f, 1.70f));
+        room1.getPoints().add(new PointF(13.56f, 0.50f));
+        room1.getPoints().add(new PointF(6.44f, 13.00f));
+        room1.getPoints().add(new PointF(13.56f, 13.00f));
         sClubRooms.add(room1);
 
         PandaBeacon pandaBeacon1Room1 = new PandaBeacon();
         pandaBeacon1Room1.setName("Beacon1");
-        pandaBeacon1Room1.setX(1.44);
-        pandaBeacon1Room1.setY(2.35);
-        pandaBeacon1Room1.setStrenght(1.5);
+        pandaBeacon1Room1.setX(10.00);
+        pandaBeacon1Room1.setY(1.07);
+        pandaBeacon1Room1.setStrenght(3);
         pandaBeacon1Room1.setClubRoom(room1);
-        pandaBeacon1Room1.setMajor(301);
+        pandaBeacon1Room1.setMajor(101);
         sPandaBeacons.put(pandaBeacon1Room1.getMajor(), pandaBeacon1Room1);
 
         PandaBeacon pandaBeacon2Room1 = new PandaBeacon();
         pandaBeacon2Room1.setName("Beacon2");
-        pandaBeacon2Room1.setX(1.44);
-        pandaBeacon2Room1.setY(6.20);
-        pandaBeacon2Room1.setStrenght(1.5);
+        pandaBeacon2Room1.setX(10.00);
+        pandaBeacon2Room1.setY(7.03);
+        pandaBeacon2Room1.setStrenght(3);
         pandaBeacon2Room1.setClubRoom(room1);
-        pandaBeacon2Room1.setMajor(302);
+        pandaBeacon2Room1.setMajor(102);
         sPandaBeacons.put(pandaBeacon2Room1.getMajor(), pandaBeacon2Room1);
 
         PandaBeacon pandaBeacon3Room1 = new PandaBeacon();
         pandaBeacon3Room1.setName("Beacon3");
-        pandaBeacon3Room1.setX(1.44);
-        pandaBeacon3Room1.setY(10.05);
-        pandaBeacon3Room1.setStrenght(1.5);
+        pandaBeacon3Room1.setX(10.00);
+        pandaBeacon3Room1.setY(13.00);
+        pandaBeacon3Room1.setStrenght(3);
         pandaBeacon3Room1.setClubRoom(room1);
-        pandaBeacon3Room1.setMajor(304);
+        pandaBeacon3Room1.setMajor(103);
         sPandaBeacons.put(pandaBeacon3Room1.getMajor(), pandaBeacon3Room1);
 
         //ROOM 2
 
         ClubRoom room2 = new ClubRoom();
         room2.setIdent(2);
-        room2.getPoints().add(new PointF(5.95f, 0.48f));
-        room2.getPoints().add(new PointF(12.07f, 0.48f));
-        room2.getPoints().add(new PointF(5.95f, 6.59f));
-        room2.getPoints().add(new PointF(12.07f, 6.59f));
+        room2.getPoints().add(new PointF(0.45f, 2.70f));
+        room2.getPoints().add(new PointF(6.32f, 1.70f));
+        room2.getPoints().add(new PointF(6.32f, 8.83f));
+        room2.getPoints().add(new PointF(0.45f, 8.83f));
         sClubRooms.add(room2);
 
         PandaBeacon pandaBeacon1Room2 = new PandaBeacon();
         pandaBeacon1Room2.setName("Beacon1_Room2");
-        pandaBeacon1Room2.setX(9.58);
+        pandaBeacon1Room2.setX(3.38);
         pandaBeacon1Room2.setY(3.00);
-        pandaBeacon1Room2.setStrenght(1.5);
+        pandaBeacon1Room2.setStrenght(3);
         pandaBeacon1Room2.setClubRoom(room2);
-        pandaBeacon1Room2.setMajor(401);
+        pandaBeacon1Room2.setMajor(106);
         sPandaBeacons.put(pandaBeacon1Room2.getMajor(), pandaBeacon1Room2);
 
-        //ROOM 3
+        PandaBeacon pandaBeacon2Room2 = new PandaBeacon();
+        pandaBeacon2Room2.setName("Beacon1_Room2");
+        pandaBeacon2Room2.setX(3.38);
+        pandaBeacon2Room2.setY(8.83);
+        pandaBeacon2Room2.setStrenght(3);
+        pandaBeacon2Room2.setClubRoom(room2);
+        pandaBeacon2Room2.setMajor(107);
+        sPandaBeacons.put(pandaBeacon2Room2.getMajor(), pandaBeacon2Room2);
 
-        ClubRoom room3 = new ClubRoom();
-        room3.setIdent(3);
-        room3.getPoints().add(new PointF(5.95f, 6.74f));
-        room3.getPoints().add(new PointF(12.07f, 6.74f));
-        room3.getPoints().add(new PointF(5.95f, 12.42f));
-        room3.getPoints().add(new PointF(12.07f, 12.42f));
-        sClubRooms.add(room3);
-
-        PandaBeacon pandaBeacon1Room3 = new PandaBeacon();
-        pandaBeacon1Room3.setName("Beacon1_Room3");
-        pandaBeacon1Room3.setX(9.52);
-        pandaBeacon1Room3.setY(8.51);
-        pandaBeacon1Room3.setStrenght(1.5);
-        pandaBeacon1Room3.setClubRoom(room3);
-        pandaBeacon1Room3.setMajor(405);
-        sPandaBeacons.put(pandaBeacon1Room3.getMajor(), pandaBeacon1Room3);
+//        // Test map
+//        sFloor = new ClubFloor();
+//        sFloor.setMapScale(100);
+//        sFloor.setWidth(1243);
+//        sFloor.setHeight(1338);
+//
+//        // ROOM 1
+//
+//        ClubRoom room1 = new ClubRoom();
+//        room1.setIdent(1);
+//        room1.getPoints().add(new PointF(0.16f, 0.48f));
+//        room1.getPoints().add(new PointF(5.79f, 0.48f));
+//        room1.getPoints().add(new PointF(0.16f, 12.41f));
+//        room1.getPoints().add(new PointF(5.79f, 12.41f));
+//        sClubRooms.add(room1);
+//
+//        PandaBeacon pandaBeacon1Room1 = new PandaBeacon();
+//        pandaBeacon1Room1.setName("Beacon1");
+//        pandaBeacon1Room1.setX(1.44);
+//        pandaBeacon1Room1.setY(2.35);
+//        pandaBeacon1Room1.setStrenght(1.5);
+//        pandaBeacon1Room1.setClubRoom(room1);
+//        pandaBeacon1Room1.setMajor(301);
+//        sPandaBeacons.put(pandaBeacon1Room1.getMajor(), pandaBeacon1Room1);
+//
+//        PandaBeacon pandaBeacon2Room1 = new PandaBeacon();
+//        pandaBeacon2Room1.setName("Beacon2");
+//        pandaBeacon2Room1.setX(1.44);
+//        pandaBeacon2Room1.setY(6.20);
+//        pandaBeacon2Room1.setStrenght(1.5);
+//        pandaBeacon2Room1.setClubRoom(room1);
+//        pandaBeacon2Room1.setMajor(302);
+//        sPandaBeacons.put(pandaBeacon2Room1.getMajor(), pandaBeacon2Room1);
+//
+//        PandaBeacon pandaBeacon3Room1 = new PandaBeacon();
+//        pandaBeacon3Room1.setName("Beacon3");
+//        pandaBeacon3Room1.setX(1.44);
+//        pandaBeacon3Room1.setY(10.05);
+//        pandaBeacon3Room1.setStrenght(1.5);
+//        pandaBeacon3Room1.setClubRoom(room1);
+//        pandaBeacon3Room1.setMajor(304);
+//        sPandaBeacons.put(pandaBeacon3Room1.getMajor(), pandaBeacon3Room1);
+//
+//        //ROOM 2
+//
+//        ClubRoom room2 = new ClubRoom();
+//        room2.setIdent(2);
+//        room2.getPoints().add(new PointF(5.95f, 0.48f));
+//        room2.getPoints().add(new PointF(12.07f, 0.48f));
+//        room2.getPoints().add(new PointF(5.95f, 6.59f));
+//        room2.getPoints().add(new PointF(12.07f, 6.59f));
+//        sClubRooms.add(room2);
+//
+//        PandaBeacon pandaBeacon1Room2 = new PandaBeacon();
+//        pandaBeacon1Room2.setName("Beacon1_Room2");
+//        pandaBeacon1Room2.setX(9.58);
+//        pandaBeacon1Room2.setY(3.00);
+//        pandaBeacon1Room2.setStrenght(1.5);
+//        pandaBeacon1Room2.setClubRoom(room2);
+//        pandaBeacon1Room2.setMajor(401);
+//        sPandaBeacons.put(pandaBeacon1Room2.getMajor(), pandaBeacon1Room2);
+//
+//        //ROOM 3
+//
+//        ClubRoom room3 = new ClubRoom();
+//        room3.setIdent(3);
+//        room3.getPoints().add(new PointF(5.95f, 6.74f));
+//        room3.getPoints().add(new PointF(12.07f, 6.74f));
+//        room3.getPoints().add(new PointF(5.95f, 12.42f));
+//        room3.getPoints().add(new PointF(12.07f, 12.42f));
+//        sClubRooms.add(room3);
+//
+//        PandaBeacon pandaBeacon1Room3 = new PandaBeacon();
+//        pandaBeacon1Room3.setName("Beacon1_Room3");
+//        pandaBeacon1Room3.setX(9.52);
+//        pandaBeacon1Room3.setY(8.51);
+//        pandaBeacon1Room3.setStrenght(1.5);
+//        pandaBeacon1Room3.setClubRoom(room3);
+//        pandaBeacon1Room3.setMajor(405);
+//        sPandaBeacons.put(pandaBeacon1Room3.getMajor(), pandaBeacon1Room3);
 
         // Init club guests
 
@@ -150,40 +222,40 @@ public class DataBase {
 
 
         // 301
-        Customer customer1 = new Customer(avatarUrl_1, 301, "fc0eef2e-aef3-44c5-84dd-f26823dbd0bd");
-        Customer customer2 = new Customer(avatarUrl_2, 301, "8264da26-5b10-4dd8-aa58-98a45dea6985");
-        Customer customer3 = new Customer(avatarUrl_3, 301, "696f79b4-b068-455e-a6ea-7b22c5210fb0");
-        Customer customer4 = new Customer(avatarUrl_4, 301, "a0528ed4-c3b7-44d1-974c-aad41184d67d");
-        Customer customer5 = new Customer(avatarUrl_5, 301, "483f414e-4572-4937-ad5a-38f3b337d2e3");
+        Customer customer1 = new Customer(avatarUrl_1, 101, "fc0eef2e-aef3-44c5-84dd-f26823dbd0bd");
+        Customer customer2 = new Customer(avatarUrl_2, 101, "8264da26-5b10-4dd8-aa58-98a45dea6985");
+        Customer customer3 = new Customer(avatarUrl_3, 101, "696f79b4-b068-455e-a6ea-7b22c5210fb0");
+        Customer customer4 = new Customer(avatarUrl_4, 101, "a0528ed4-c3b7-44d1-974c-aad41184d67d");
+        Customer customer5 = new Customer(avatarUrl_5, 101, "483f414e-4572-4937-ad5a-38f3b337d2e3");
 
         //302
-        Customer customer6 = new Customer(avatarUrl_6, 302, "483f414e-4572-4937-ad5a-38f3b337d2e5");
-        Customer customer7 = new Customer(avatarUrl_7, 302, "483f414e-4572-4937-ad5a-38f3b337d2e4");
-        Customer customer8 = new Customer(avatarUrl_8, 302, "483f414e-4572-4937-ad5a-38f3b337d2e8");
-        Customer customer9 = new Customer(avatarUrl_9, 302, "483f414e-4572-4937-ad5a-38f3b337d2e7");
-        Customer customer10 = new Customer(avatarUrl_25, 302, "483f414e-4572-4937-ad5");
-        Customer customer11 = new Customer(avatarUrl_11, 302, "483f414e-4572-4937-");
+        Customer customer6 = new Customer(avatarUrl_6, 102, "483f414e-4572-4937-ad5a-38f3b337d2e5");
+        Customer customer7 = new Customer(avatarUrl_7, 102, "483f414e-4572-4937-ad5a-38f3b337d2e4");
+        Customer customer8 = new Customer(avatarUrl_8, 102, "483f414e-4572-4937-ad5a-38f3b337d2e8");
+        Customer customer9 = new Customer(avatarUrl_9, 102, "483f414e-4572-4937-ad5a-38f3b337d2e7");
+        Customer customer10 = new Customer(avatarUrl_25, 102, "483f414e-4572-4937-ad5");
+        Customer customer11 = new Customer(avatarUrl_11, 102, "483f414e-4572-4937-");
 
         //304
-        Customer customer12 = new Customer(avatarUrl_12, 304, "483f414e-4572-4937-ad5a-38f3b337");
-        Customer customer13 = new Customer(avatarUrl_13, 304, "414e-4572-4937-ad5a-38f37d2e7");
-        Customer customer14 = new Customer(avatarUrl_14, 304, "f414e-4572-4937-ad7d2e7");
-        Customer customer15 = new Customer(avatarUrl_15, 304, "483f414e-4572-4937-ad5ad2e7");
-        Customer customer16 = new Customer(avatarUrl_16, 304, "483f414e-4572-4937-ad5a-38fd2e7");
-        Customer customer17 = new Customer(avatarUrl_17, 304, "483f414e-4572-4937-ad537d2e7");
-        Customer customer18 = new Customer(avatarUrl_18, 304, "483f414e-4572-4937b337d2e7");
+        Customer customer12 = new Customer(avatarUrl_12, 103, "483f414e-4572-4937-ad5a-38f3b337");
+        Customer customer13 = new Customer(avatarUrl_13, 103, "414e-4572-4937-ad5a-38f37d2e7");
+        Customer customer14 = new Customer(avatarUrl_14, 103, "f414e-4572-4937-ad7d2e7");
+        Customer customer15 = new Customer(avatarUrl_15, 103, "483f414e-4572-4937-ad5ad2e7");
+        Customer customer16 = new Customer(avatarUrl_16, 103, "483f414e-4572-4937-ad5a-38fd2e7");
+        Customer customer17 = new Customer(avatarUrl_17, 103, "483f414e-4572-4937-ad537d2e7");
+        Customer customer18 = new Customer(avatarUrl_18, 103, "483f414e-4572-4937b337d2e7");
 
         //401
-        Customer customer19 = new Customer(avatarUrl_19, 401, "f414e-4572-4937-ad5a-38f37d2e7");
-        Customer customer20 = new Customer(avatarUrl_20, 401, "414e-42--ad5a-38f3b337d2e7");
-        Customer customer21 = new Customer(avatarUrl_21, 401, "f414e-4572-4937-ad5a-38f3b337d2e7");
-        Customer customer22 = new Customer(avatarUrl_22, 401, "483f414e-337d2e7");
+        Customer customer19 = new Customer(avatarUrl_19, 106, "f414e-4572-4937-ad5a-38f37d2e7");
+        Customer customer20 = new Customer(avatarUrl_20, 106, "414e-42--ad5a-38f3b337d2e7");
+        Customer customer21 = new Customer(avatarUrl_21, 106, "f414e-4572-4937-ad5a-38f3b337d2e7");
+        Customer customer22 = new Customer(avatarUrl_22, 106, "483f414e-337d2e7");
 
         //404
-        Customer customer23 = new Customer(avatarUrl_23, 405, "483f414e-4572-49377d2e7");
-        Customer customer24 = new Customer(avatarUrl_24, 405, "-4572-4937-ad5a-38f3b337d2e7");
-        Customer customer25 = new Customer(avatarUrl_25, 405, "483f414e-4572-4937-f3b337d2e7");
-        Customer currentUser = new Customer(avatarUrl_10, 405, "current_user_id");
+        Customer customer23 = new Customer(avatarUrl_23, 107, "483f414e-4572-49377d2e7");
+        Customer customer24 = new Customer(avatarUrl_24, 107, "-4572-4937-ad5a-38f3b337d2e7");
+        Customer customer25 = new Customer(avatarUrl_25, 107, "483f414e-4572-4937-f3b337d2e7");
+        Customer currentUser = new Customer(avatarUrl_10, 107, "current_user_id");
 
         sCustomers.add(customer1);
         sCustomers.add(customer2);

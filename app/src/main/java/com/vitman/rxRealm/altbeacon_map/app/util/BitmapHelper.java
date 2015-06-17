@@ -47,4 +47,5 @@ public class BitmapHelper {
         c.drawBitmap(bitmap, 0, 0, paint);
         return bmpGrayscale;
     }
+
 }

@@ -11,6 +11,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.*;
 import com.vitman.rxRealm.altbeacon_map.app.entity.Customer;
@@ -125,7 +126,8 @@ public class MainActivity extends Activity implements BeaconConsumer {
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
                 Bitmap originalMapBitmap = BitmapFactory
-                        .decodeResource(getResources(), R.drawable.map, options);
+//                        .decodeResource(getResources(), R.drawable.map, options);
+                        .decodeResource(getResources(), R.drawable.devabit_map, options);
                 subscriber.onNext(originalMapBitmap);
                 subscriber.onCompleted();
             }
@@ -156,7 +158,6 @@ public class MainActivity extends Activity implements BeaconConsumer {
                                 new Func2<Bitmap, Customer, Pair>() {
                                     @Override
                                     public Pair call(Bitmap bitmap, Customer customer) {
-
                                         Bitmap greyBitmap = mBitmapHelper.getGrayscaleBitmap(bitmap);
                                         ImageView marker = mViewBuilder
                                                 .getMarker(greyBitmap, customer.getUserId(), mMarkerWidth);
@@ -251,7 +252,6 @@ public class MainActivity extends Activity implements BeaconConsumer {
                         }
                     }
                 }
-
 //                RelativeLayout.LayoutParams param = (RelativeLayout.LayoutParams) gridLayout.getLayoutParams();
                 LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) gridLayout.getLayoutParams();
 
@@ -263,12 +263,14 @@ public class MainActivity extends Activity implements BeaconConsumer {
 
                 LinearLayout linearLayout = mLayoutBuilder.getLinearLayout();
 
-                TextView zoneTitle = mViewBuilder.getZoneTitleTextView(customers.get(0).getBeaconId());
+                TextView zoneTitle = mViewBuilder.getZoneTitleTextView(beaconIdTag);
 
                 linearLayout.addView(zoneTitle);
 
                 for (int row = 0; row < gridLayout.getRowCount(); row++) {
+
                     for (int column = 0; column < gridLayout.getColumnCount(); column++) {
+
                         int customerRemains = customers.size() - gridLayout.getChildCount();
                         if (row + 1 == gridLayout.getRowCount() && customerRemains > 0) {
                             TextView textView = mViewBuilder.getCustomerRemainsTextView(customerRemains);
@@ -276,12 +278,10 @@ public class MainActivity extends Activity implements BeaconConsumer {
                             GridLayout.LayoutParams param =new GridLayout.LayoutParams();
                             param.height = GridLayout.LayoutParams.MATCH_PARENT;
                             param.width = GridLayout.LayoutParams.MATCH_PARENT;
-param.setMargins(20, 20, 20 , 20);
                             param.setGravity(Gravity.CENTER);
                             param.columnSpec = GridLayout.spec(column, gridLayout.getColumnCount());
                             param.rowSpec = GridLayout.spec(row);
                             textView.setLayoutParams(param);
-
                             gridLayout.addView(textView);
                             break;
                         }
@@ -311,13 +311,6 @@ param.setMargins(20, 20, 20 , 20);
                     }
                 }
                 linearLayout.addView(gridLayout);
-                int remainsCustomers = customers.size() - gridLayout.getChildCount();
-                if (remainsCustomers > 0) {
-                    TextView customerRemainsTextView = mViewBuilder.getCustomerRemainsTextView
-                            (remainsCustomers);
-                    linearLayout.addView(customerRemainsTextView);
-                }
-
                 linearLayout.setTag(beaconIdTag);
                 return linearLayout;
             }
@@ -349,6 +342,7 @@ param.setMargins(20, 20, 20 , 20);
                                     Point positionPoint = getPointPositionByBeacon(beacon);
                                     layout.setTranslationX(positionPoint.x - layout.getWidth() / 2);
                                     layout.setTranslationY(positionPoint.y - layout.getHeight() / 2);
+                                    layout.setVisibility(View.VISIBLE);
                                     layout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                                 }
                             });
@@ -363,6 +357,7 @@ param.setMargins(20, 20, 20 , 20);
             @Override
             public void onNext(LinearLayout linearLayout) {
                 Log.e(LOG_TAG, "On next");
+                linearLayout.setVisibility(View.INVISIBLE);
                 mMapLayout.addView(linearLayout);
             }
         };
