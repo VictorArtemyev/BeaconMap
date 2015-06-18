@@ -1,22 +1,16 @@
 package com.vitman.rxRealm.altbeacon_map.app;
 
 import android.app.Activity;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Point;
-import android.graphics.PointF;
-import android.graphics.Rect;
+import android.graphics.*;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.*;
-
 import com.vitman.rxRealm.altbeacon_map.app.entity.ClubRoom;
 import com.vitman.rxRealm.altbeacon_map.app.entity.Customer;
 import com.vitman.rxRealm.altbeacon_map.app.entity.DataBase;
@@ -26,6 +20,7 @@ import com.vitman.rxRealm.altbeacon_map.app.util.BitmapHelper;
 import com.vitman.rxRealm.altbeacon_map.app.util.LayoutBuilder;
 import com.vitman.rxRealm.altbeacon_map.app.util.ViewBuilder;
 import org.altbeacon.beacon.*;
+import org.altbeacon.beacon.Region;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -114,6 +109,8 @@ public class MainActivity extends Activity implements BeaconConsumer {
     }
 
     // Setting up map on layout
+
+
 
     private void setupMap() {
         createImageBitmapObservable()

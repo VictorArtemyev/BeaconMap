@@ -14,6 +14,7 @@ import com.vitman.rxRealm.altbeacon_map.app.R;
  */
 public class ViewBuilder {
     private Context mContext;
+    private BitmapHelper mBitmapHelper;
 
     public ViewBuilder(Context context) {
         mContext = context;
