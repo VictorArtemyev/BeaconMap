@@ -241,15 +241,15 @@ public class DataBase {
         Customer customer13 = new Customer(avatarUrl_13, 103, "414e-4572-4937-ad5a-38f37d2e7");
         Customer customer14 = new Customer(avatarUrl_14, 103, "f414e-4572-4937-ad7d2e7");
         Customer customer15 = new Customer(avatarUrl_15, 103, "483f414e-4572-4937-ad5ad2e7");
-        Customer customer16 = new Customer(avatarUrl_16, 103, "483f414e-4572-4937-ad5a-38fd2e7");
-        Customer customer17 = new Customer(avatarUrl_17, 103, "483f414e-4572-4937-ad537d2e7");
-        Customer customer18 = new Customer(avatarUrl_18, 103, "483f414e-4572-4937b337d2e7");
+        Customer customer16 = new Customer(avatarUrl_16, 107, "483f414e-4572-4937-ad5a-38fd2e7");
+        Customer customer17 = new Customer(avatarUrl_17, 107, "483f414e-4572-4937-ad537d2e7");
+        Customer customer18 = new Customer(avatarUrl_18, 107, "483f414e-4572-4937b337d2e7");
 
         //401
-        Customer customer19 = new Customer(avatarUrl_19, 106, "f414e-4572-4937-ad5a-38f37d2e7");
-        Customer customer20 = new Customer(avatarUrl_20, 106, "414e-42--ad5a-38f3b337d2e7");
-        Customer customer21 = new Customer(avatarUrl_21, 106, "f414e-4572-4937-ad5a-38f3b337d2e7");
-        Customer customer22 = new Customer(avatarUrl_22, 106, "483f414e-337d2e7");
+        Customer customer19 = new Customer(avatarUrl_19, 107, "f414e-4572-4937-ad5a-38f37d2e7");
+        Customer customer20 = new Customer(avatarUrl_20, 107, "414e-42--ad5a-38f3b337d2e7");
+        Customer customer21 = new Customer(avatarUrl_21, 107, "f414e-4572-4937-ad5a-38f3b337d2e7");
+        Customer customer22 = new Customer(avatarUrl_22, 107, "483f414e-337d2e7");
 
         //404
         Customer customer23 = new Customer(avatarUrl_23, 107, "483f414e-4572-49377d2e7");

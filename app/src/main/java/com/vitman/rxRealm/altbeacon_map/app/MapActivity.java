@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -12,10 +13,7 @@ import com.vitman.rxRealm.altbeacon_map.app.entity.CustomerMarker;
 import com.vitman.rxRealm.altbeacon_map.app.entity.DataBase;
 import com.vitman.rxRealm.altbeacon_map.app.entity.PandaBeacon;
 import com.vitman.rxRealm.altbeacon_map.app.layout.TouchRelativeLayout;
-import com.vitman.rxRealm.altbeacon_map.app.util.BitmapHelper;
-import com.vitman.rxRealm.altbeacon_map.app.util.LayoutBuilder;
 import com.vitman.rxRealm.altbeacon_map.app.util.MapService;
-import com.vitman.rxRealm.altbeacon_map.app.util.ViewBuilder;
 import rx.Subscriber;
 import rx.Subscription;
 
@@ -33,9 +31,6 @@ public class MapActivity extends AppCompatActivity {
 
     private DataBase mDataBase;
     private MapService mMapService;
-    private BitmapHelper mBitmapHelper;
-    private LayoutBuilder mLayoutBuilder;
-    private ViewBuilder mViewBuilder;
 
     private TouchRelativeLayout mHolderLayout;
     private RelativeLayout mMapLayout;
@@ -45,7 +40,7 @@ public class MapActivity extends AppCompatActivity {
     private List<Customer> mCustomers;
 
     // list of customer layouts which contains all customers divided into zones by beacons
-    private List<GridLayout> mCustomerLayouts = new ArrayList<>();
+    private List<GridLayout> mBeaconZoneLayouts = new ArrayList<>();
 
     // map of customer markers on map, where key - user id and value - user avatar
     private Map<String, CustomerMarker> mCustomerMarkers = new HashMap<>();
@@ -63,6 +58,10 @@ public class MapActivity extends AppCompatActivity {
         setupMap();
     }
 
+    public void onClick(View view) {
+       setupCustomerMarkersOnMap();
+    }
+
     private void initCustomerData() {
         mDataBase = DataBase.getInstance();
         mCustomers = mDataBase.getCustomers();
@@ -75,6 +74,12 @@ public class MapActivity extends AppCompatActivity {
         mMapImageView = (ImageView) findViewById(R.id.map_imageView);
     }
 
+    private void clearBeaconZoneLayouts() {
+        for (GridLayout layout : mBeaconZoneLayouts) {
+            layout.removeAllViews();
+//            layout.invalidate();
+        }
+    }
 
     private void setupMap() {
         Subscription mapSubscription = mMapService
@@ -87,16 +92,16 @@ public class MapActivity extends AppCompatActivity {
                 .createCustomerMarkerProducerObservable(mCustomers, mCustomerMarkersSubscriber);
     }
 
-    // TODO: implemented new logic
-    private void setupZoneOnMapByBeacon() {
-//        Subscription zoneSubscription = mMapService
-//                .createBeaconZoneObservabe()
+    private void setupBeaconZoneOnMap() {
+        Subscription zoneSubscription = mMapService
+                .createBeaconZoneObservable(mMapImageView, mBeacons, mBeaconZoneSubscriber);
     }
 
-
     private void setupCustomerMarkersOnMap() {
-//        Subscription markersOnMapSubscription = mMapService
-//                .create
+        clearBeaconZoneLayouts();
+        Subscription markersOnMapSubscription = mMapService
+                .createCustomerMarkerOnMapObservable(mCustomers, mCustomerMarkers,
+                        mBeaconZoneLayouts, mMarkersOnMapSubscriber);
     }
 
     private Subscriber<Bitmap> mMapSubscriber = new Subscriber<Bitmap>() {
@@ -107,7 +112,7 @@ public class MapActivity extends AppCompatActivity {
 
         @Override
         public void onError(Throwable e) {
-            Log.e(LOG_TAG, "Map Subscriber - " +  e.toString());
+            Log.e(LOG_TAG, "Map Subscriber - " + e);
         }
 
         @Override
@@ -122,13 +127,13 @@ public class MapActivity extends AppCompatActivity {
         @Override
         public void onCompleted() {
             Log.e(LOG_TAG, mCustomerMarkers.toString());
-            setupZoneOnMapByBeacon();
-//            setupCustomerMarkersOnMap();
+            setupBeaconZoneOnMap();
         }
 
         @Override
         public void onError(Throwable e) {
-            Log.e(LOG_TAG, "Customer Markers Subscriber - " + e.toString());
+            e.printStackTrace();
+            Log.e(LOG_TAG, "Customer Markers Subscriber - " + e);
         }
 
         @Override
@@ -138,6 +143,48 @@ public class MapActivity extends AppCompatActivity {
         }
     };
 
+    private Subscriber<GridLayout> mBeaconZoneSubscriber = new Subscriber<GridLayout>() {
+        @Override
+        public void onCompleted() {
+            setupCustomerMarkersOnMap();
+        }
 
+        @Override
+        public void onError(Throwable e) {
+            Log.e(LOG_TAG, "Beacon Zone Subscriber - " + e);
+            e.printStackTrace();
+        }
+
+        @Override
+        public void onNext(GridLayout gridLayout) {
+            mBeaconZoneLayouts.add(gridLayout);
+            mMapLayout.addView(gridLayout);
+        }
+    };
+
+    private Subscriber<GridLayout> mMarkersOnMapSubscriber = new Subscriber<GridLayout>() {
+        @Override
+        public void onCompleted() {
+            Log.e(LOG_TAG, "on completed - mMarkersOnMapSubscriber");
+            Log.e(LOG_TAG, mBeaconZoneLayouts.size() + "");
+            for (GridLayout layout : mBeaconZoneLayouts) {
+                if (layout != null) {
+                    Log.e(LOG_TAG, layout.getChildCount() + "");
+                }
+            }
+        }
+
+        @Override
+        public void onError(Throwable e) {
+            Log.e(LOG_TAG, " Markers On Map Subscriber - " + e);
+            e.printStackTrace();
+        }
+
+        @Override
+        public void onNext(GridLayout gridLayout) {
+            gridLayout.invalidate();
+            Log.e(LOG_TAG, "invalidate");
+        }
+    };
 
 }

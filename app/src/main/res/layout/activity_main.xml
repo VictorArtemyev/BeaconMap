@@ -12,6 +12,11 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent">
 
+            <Button android:onClick="onClick"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Reload"/>
+
         <ImageView
                 android:id="@+id/map_imageView"
                 android:layout_width="wrap_content"

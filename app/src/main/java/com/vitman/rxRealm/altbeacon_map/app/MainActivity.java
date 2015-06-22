@@ -261,14 +261,14 @@ public class MainActivity extends Activity implements BeaconConsumer {
                     gridLayout.setRowCount(1);
                 }
 
-                if (gridLayout.getRowCount() >  customers.size() / gridLayout.getColumnCount()) {
+                if (gridLayout.getColumnCount() != 0 && gridLayout.getRowCount() > customers.size() / gridLayout.getColumnCount()) {
                     gridLayout.setRowCount((int) Math.ceil((double)customers.size() / gridLayout.getColumnCount()));
                 }
 
                 int m3 = gridLayout.getColumnCount();
                 int m4 = gridLayout.getRowCount();
 
-//                RelativeLayout.LayoutParams param = (RelativeLayout.LayoutParams) gridLayout.getLayoutParams();
+//                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) gridLayout.getLayoutParams();
                 LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) gridLayout.getLayoutParams();
 
                 float widthMargin = params.width - mMarkerWidth * gridLayout.getColumnCount();
@@ -288,9 +288,9 @@ public class MainActivity extends Activity implements BeaconConsumer {
 
                 for (int row = 0; row < gridLayout.getRowCount(); row++) {
 
-                    for (int column = 0; column < gridLayout.getColumnCount(); column++) {
+                        for (int column = 0; column < gridLayout.getColumnCount(); column++) {
 
-                        int customerRemains = customers.size() - gridLayout.getChildCount();
+                            int customerRemains = customers.size() - gridLayout.getChildCount();
 //                        if (row + 1 == gridLayout.getRowCount() && customerRemains > 0) {
 //                            TextView textView = mViewBuilder.getCustomerRemainsTextView(customerRemains);
 //
@@ -387,7 +387,6 @@ public class MainActivity extends Activity implements BeaconConsumer {
                                     beaconRect.top = Math.max((int) convertValueToView(beacon.getY() - beacon.getStrenght()), roomRect.top);
                                     beaconRect.right = Math.min((int) convertValueToView(beacon.getX() + beacon.getStrenght()), roomRect.right);
                                     beaconRect.bottom = Math.min((int) convertValueToView(beacon.getY() + beacon.getStrenght()), roomRect.bottom);
-
 
                                     layout.setTranslationX(beaconRect.left);
                                     layout.setTranslationY(beaconRect.top + startPositionY);
