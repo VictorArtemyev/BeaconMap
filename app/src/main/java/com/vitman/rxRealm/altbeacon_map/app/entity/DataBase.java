@@ -187,39 +187,30 @@ public class DataBase {
         // Init club guests
 
         String avatarUrl_1 = "https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcQjtrtlg62fz7YWeYNZRWiZXhCRwZ0vAK7SIa7s-T_To6gFLmBSuQ";
-        String avatarUrl_2 = "https://im3-tub-ua.yandex.net/i?id=45646326c2d6323a65b549110f190cd9&n=21";
-        String avatarUrl_3 = "https://im0-tub-ua.yandex.net/i?id=dd98fd79ec3d47650008ab6627b6e6ab&n=21";
-        String avatarUrl_4 = "https://im1-tub-ua.yandex.net/i?id=c265b7d479431304111a4aaf8947e209&n=21";
-        String avatarUrl_5 = "https://im1-tub-ua.yandex.net/i?id=2952d9943177d5bef95cae036d11fd25&n=21";
-        String avatarUrl_6 = "https://im3-tub-ua.yandex.net/i?id=b5fb2f761a331224ff04dcc4ae9733c1&n=21";
-        String avatarUrl_7 = "https://im3-tub-ua.yandex.net/i?id=1f823bf056e48be4ea501e2cfb4971c1&n=21";
-        String avatarUrl_8 = "https://im0-tub-ua.yandex.net/i?id=a739c684a3ad1e7f103bddaec8a55a2d&n=21";
-        String avatarUrl_9 = "https://im1-tub-ua.yandex.net/i?id=cd405e01a5d45028d366cab015faf51f&n=21";
-        String avatarUrl_10 = "https://pbs.twimg.com/media/CGkmwmHU8AAl1IC.png";
-        String avatarUrl_11 = "https://im1-tub-ua.yandex.net/i?id=cc0c57c6ca42c064c1937acc3a9e1fb4&n=21";
-        String avatarUrl_12 = "https://im0-tub-ua.yandex.net/i?id=1de3e61d23b25313f10aad34ef897eac&n=21";
-        String avatarUrl_13 = "https://im2-tub-ua.yandex.net/i?id=6cabb579bfb106fe11de164841f81452&n=21";
-        String avatarUrl_14 = "https://im1-tub-ua.yandex.net/i?id=b93ba4996efc9ed8e142bad3c94732cc&n=21";
-        String avatarUrl_15 = "https://im2-tub-ua.yandex.net/i?id=bde0d0846a3c743d76842b82662896a8&n=21";
-        String avatarUrl_16 = "https://im1-tub-ua.yandex.net/i?id=785b50d987c9f3943c7321017b3988c7&n=21";
-        String avatarUrl_17 = "https://im3-tub-ua.yandex.net/i?id=6a339ffe0bb59a63dc6a5f6cd6d1d114&n=21";
-        String avatarUrl_18 = "https://im2-tub-ua.yandex.net/i?id=57bc8135ce9ae9ee2a30a4d9a10f5a53&n=21";
-        String avatarUrl_19 = "https://im2-tub-ua.yandex.net/i?id=24bf5f1017b2d19476817cc45e3327c8&n=21";
-        String avatarUrl_20 = "https://im1-tub-ua.yandex.net/i?id=bfd410894d862c18d83a303450c8becb&n=21";
-        String avatarUrl_21 = "https://im3-tub-ua.yandex.net/i?id=a00fba85d288ab0ed5dc6b891cb82f67&n=21";
-        String avatarUrl_22 = "https://im0-tub-ua.yandex.net/i?id=dc6d39dbda36c570026589e14b7b4220&n=21";
-        String avatarUrl_23 = "https://im2-tub-ua.yandex.net/i?id=0ae0274748883d3bad34712f9ede7d08&n=21";
-        String avatarUrl_24 = "https://im1-tub-ua.yandex.net/i?id=8dff580293b6c0c2dde6e07afca71fce&n=21";
-        String avatarUrl_25 = "https://im2-tub-ua.yandex.net/i?id=5597fe18237f24994b5f9ba2138a8c4b&n=21";
-
-
-//        String avatarUrl_20 = "http://images4.alphacoders.com/118/118748.jpg";
-//        String avatarUrl_21 = "http://vk.fotofab.ru/download/wallpaper/20120116/1024x768_13.jpg";
-//        String avatarUrl_22 = "http://ica.su/img/picture/Dec/07/5268968157b8b43a2301bb725e934b71/1.jpg";
-//        String avatarUrl_23 = "http://grandwallpapers.net/photo/hram-v-provintsii-unnan-1024x768.jpg";
-//        String avatarUrl_24 = "http://mariavgorskaya.35photo.ru/photos/20140122/656296.jpg";
-//        String avatarUrl_25 = "http://es.best-wallpaper.net/wallpaper/1024x768/1205/3D-nature-scenery_1024x768.jpg";
-
+        String avatarUrl_2 = "http://s00.yaplakal.com/pics/userpic/7/0/0/av-309007.jpg";
+        String avatarUrl_3 = "http://1.bp.blogspot.com/_TUAgZ4Z8MQg/TQkXeuBSZoI/AAAAAAAAAEU/sEJpUZDTEP8/s1600/success.jpg";
+        String avatarUrl_4 = "http://fscomps.fotosearch.com/compc/CSP/CSP990/k8774040.jpg";
+        String avatarUrl_5 = "http://s16.radikal.ru/i190/1104/e7/328231386bcb.jpg";
+        String avatarUrl_6 = "http://ncuxo-ycnex.ru/wp-content/uploads/2011/04/razvitie_polozitelnogo_otnosheniya.jpg";
+        String avatarUrl_7 = "http://static.kinokopilka.tv/system/images/users/avatars/003/378/314/Laska1987_original.jpg";
+        String avatarUrl_8 = "http://lh5.googleusercontent.com/-KZbHPse7Lv8/AAAAAAAAAAI/AAAAAAAAAJA/ch7pFXlDbkQ/s512-c/photo.jpg";
+        String avatarUrl_9 = "http://pl.wallpaperson.com/media/wallpapers/W1siZiIsIi9zeXN0ZW0vd2FsbHBhcGVyc19waG90b3MvMDAwLzA3OS8yMDAvb3JpZ2luYWwvd2FsbHBhcGVyc29uX2IyNl8yNV8uanBnIl0sWyJwIiwidGh1bWIiLCI2MDB4NjAwPiJdLFsiZSIsImpwZyJdXQ.jpg";
+        String avatarUrl_10 = "http://teecraze.com/images/fury/glassesmakemesmart.jpg";
+        String avatarUrl_11 = "http://i.artfile.ru/520x390_320492_[www.ArtFile.ru].jpg";
+        String avatarUrl_12 = "http://img4i.spoki.tvnet.lv/upload/articles/38/384916/images/Wallpapers-11.jpg";
+        String avatarUrl_13 = "http://egel.narod.ru/EGEL46.jpg";
+        String avatarUrl_14 = "http://dl23.fotosklad.org.ua/20111031/908fa46f0f639fd2ad4fb541a2f85525.jpg";
+        String avatarUrl_15 = "http://images.forwallpaper.com/files/thumbs/preview/67/678782__entropy-jack-skellington_p.jpg";
+        String avatarUrl_16 = "http://2krota.ru/uploads/posts/2009-02/1235755895_p_656.jpg";
+        String avatarUrl_17 = "http://lol54.ru/uploads/posts/2012-12/thumbs/1355417276_lol54.ru_belki_009.jpg";
+        String avatarUrl_18 = "http://topchik.ru/profile/1388350fa88b5cb4ea.jpg?4444519";
+        String avatarUrl_19 = "http://www.romanticcollection.ru/gallery/albums/angel/193a.jpg";
+        String avatarUrl_20 = "http://hq-wall.net/i/med_thumb/10/69/Liv_Tyler_da8980c44dcf0d78d6d54aac55505a71.jpg";
+        String avatarUrl_21 = "http://oboi.cc.fozzyhost.com/640-480-100-uploads/11_05_2013/view/201209/oboik.ru_26524.jpg";
+        String avatarUrl_22 = "http://www.nudecelebs.ru/photos/big/Mischa_Barton/Galereya_Mischa_Barton_ot_24_sentyabrya_2011_2_1316728261/Mischa_Barton_Wallpa-16.jpg";
+        String avatarUrl_23 = "http://intensive.pokupkith.ru/media/images/v3/201504/site287653/review4_image-1430017111-2429.jpg";
+        String avatarUrl_24 = "http://99px.ru/sstorage/56/2013/01/image_560401130928193026440.jpg";
+        String avatarUrl_25 = "http://static.tumblr.com/aqagh5s/heYmc6wu3/a55.png";
 
         // 301
         Customer customer1 = new Customer(avatarUrl_1, 101, "fc0eef2e-aef3-44c5-84dd-f26823dbd0bd");
@@ -229,27 +220,27 @@ public class DataBase {
         Customer customer5 = new Customer(avatarUrl_5, 101, "483f414e-4572-4937-ad5a-38f3b337d2e3");
 
         //302
-        Customer customer6 = new Customer(avatarUrl_6, 102, "483f414e-4572-4937-ad5a-38f3b337d2e5");
-        Customer customer7 = new Customer(avatarUrl_7, 102, "483f414e-4572-4937-ad5a-38f3b337d2e4");
-        Customer customer8 = new Customer(avatarUrl_8, 102, "483f414e-4572-4937-ad5a-38f3b337d2e8");
-        Customer customer9 = new Customer(avatarUrl_9, 102, "483f414e-4572-4937-ad5a-38f3b337d2e7");
-        Customer customer10 = new Customer(avatarUrl_25, 102, "483f414e-4572-4937-ad5");
-        Customer customer11 = new Customer(avatarUrl_11, 102, "483f414e-4572-4937-");
+        Customer customer6 = new Customer(avatarUrl_6, 103, "483f414e-4572-4937-ad5a-38f3b337d2e5");
+        Customer customer7 = new Customer(avatarUrl_7, 103, "483f414e-4572-4937-ad5a-38f3b337d2e4");
+        Customer customer8 = new Customer(avatarUrl_8, 103, "483f414e-4572-4937-ad5a-38f3b337d2e8");
+        Customer customer9 = new Customer(avatarUrl_9, 103, "483f414e-4572-4937-ad5a-38f3b337d2e7");
+        Customer customer10 = new Customer(avatarUrl_25, 103, "483f414e-4572-4937-ad5");
+        Customer customer11 = new Customer(avatarUrl_11, 103, "483f414e-4572-4937-");
 
         //304
         Customer customer12 = new Customer(avatarUrl_12, 103, "483f414e-4572-4937-ad5a-38f3b337");
         Customer customer13 = new Customer(avatarUrl_13, 103, "414e-4572-4937-ad5a-38f37d2e7");
         Customer customer14 = new Customer(avatarUrl_14, 103, "f414e-4572-4937-ad7d2e7");
         Customer customer15 = new Customer(avatarUrl_15, 103, "483f414e-4572-4937-ad5ad2e7");
-        Customer customer16 = new Customer(avatarUrl_16, 107, "483f414e-4572-4937-ad5a-38fd2e7");
-        Customer customer17 = new Customer(avatarUrl_17, 107, "483f414e-4572-4937-ad537d2e7");
-        Customer customer18 = new Customer(avatarUrl_18, 107, "483f414e-4572-4937b337d2e7");
+        Customer customer16 = new Customer(avatarUrl_16, 103, "483f414e-4572-4937-ad5a-38fd2e7");
+        Customer customer17 = new Customer(avatarUrl_17, 103, "483f414e-4572-4937-ad537d2e7");
+        Customer customer18 = new Customer(avatarUrl_18, 103, "483f414e-4572-4937b337d2e7");
 
         //401
-        Customer customer19 = new Customer(avatarUrl_19, 107, "f414e-4572-4937-ad5a-38f37d2e7");
-        Customer customer20 = new Customer(avatarUrl_20, 107, "414e-42--ad5a-38f3b337d2e7");
-        Customer customer21 = new Customer(avatarUrl_21, 107, "f414e-4572-4937-ad5a-38f3b337d2e7");
-        Customer customer22 = new Customer(avatarUrl_22, 107, "483f414e-337d2e7");
+        Customer customer19 = new Customer(avatarUrl_19, 103, "f414e-4572-4937-ad5a-38f37d2e7");
+        Customer customer20 = new Customer(avatarUrl_20, 103, "414e-42--ad5a-38f3b337d2e7");
+        Customer customer21 = new Customer(avatarUrl_21, 103, "f414e-4572-4937-ad5a-38f3b337d2e7");
+        Customer customer22 = new Customer(avatarUrl_22, 103, "483f414e-337d2e7");
 
         //404
         Customer customer23 = new Customer(avatarUrl_23, 107, "483f414e-4572-49377d2e7");

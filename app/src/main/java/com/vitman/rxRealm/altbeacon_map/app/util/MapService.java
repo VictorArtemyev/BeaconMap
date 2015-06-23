@@ -1,15 +1,15 @@
 package com.vitman.rxRealm.altbeacon_map.app.util;
 
 import android.app.Activity;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
-import android.widget.GridLayout;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
+import android.widget.*;
+import com.vitman.rxRealm.altbeacon_map.app.R;
 import com.vitman.rxRealm.altbeacon_map.app.entity.Customer;
 import com.vitman.rxRealm.altbeacon_map.app.entity.CustomerMarker;
 import com.vitman.rxRealm.altbeacon_map.app.entity.PandaBeacon;
@@ -33,6 +33,7 @@ public class MapService {
 
     private static final String LOG_TAG = MapService.class.getCanonicalName();
     private static final int MARKER_RELATIVE_SIZE = 14;
+
     private Activity mActivity;
 
     private float mOriginalMapWidth;
@@ -40,15 +41,6 @@ public class MapService {
     private float mCurrentMapWidth;
     private float mCurrentMapHeight;
     private float mScale;
-
-    public int getMarkerSize() {
-        return mMarkerSize;
-    }
-
-    public void setMarkerSize(int markerSize) {
-        mMarkerSize = markerSize;
-    }
-
     private int mMarkerSize;
 
     private Point mMapStartPoint = new Point();
@@ -56,6 +48,8 @@ public class MapService {
     private BitmapHelper mBitmapHelper;
     private ViewBuilder mViewBuilder;
     private LayoutBuilder mLayoutBuilder;
+
+
 
     public MapService(Activity activity) {
         mActivity = activity;
@@ -103,6 +97,14 @@ public class MapService {
         mMapStartPoint = mapStartPoint;
     }
 
+    public int getMarkerSize() {
+        return mMarkerSize;
+    }
+
+    public void setMarkerSize(int markerSize) {
+        mMarkerSize = markerSize;
+    }
+
     private void initOriginalMapSize(Bitmap originalMap) {
         mOriginalMapWidth = originalMap.getWidth();
         mOriginalMapHeight = originalMap.getHeight();
@@ -133,7 +135,10 @@ public class MapService {
         mLayoutBuilder = new LayoutBuilder(mActivity, mScale);
     }
 
-    // create and setup on ui club map
+
+
+    // ===================== create and setup map =============================
+
     public Subscription createMapBitmapObservable(int resourceId,
                                                   Subscriber<Bitmap> subscriber) {
         return Observable.create(getMapBitmapOnSubscribe(resourceId))
@@ -184,7 +189,7 @@ public class MapService {
         };
     }
 
-    //produce customer markers
+    // ==================== produce customer markers ======================================
 
     public Subscription createCustomerMarkerProducerObservable(List<Customer> customers,
                                                                Subscriber<CustomerMarker> subscriber) {
@@ -212,12 +217,18 @@ public class MapService {
             @Override
             public void call(Subscriber<? super Bitmap> subscriber) {
                 String customerAvatarUrl = customer.getAvatarUrl();
+                Log.e(LOG_TAG, customerAvatarUrl);
                 Bitmap avatarBitmap = mBitmapHelper.getBitmapFromURL(customerAvatarUrl);
-                subscriber.onNext(avatarBitmap);
+                if(avatarBitmap != null) {
+                    subscriber.onNext(avatarBitmap);
+                }
             }
         }).map(new Func1<Bitmap, Bitmap>() {
             @Override
             public Bitmap call(Bitmap bitmap) {
+                if (bitmap == null) {
+                    return BitmapFactory.decodeResource(Resources.getSystem(), R.drawable.map);
+                }
                 Bitmap greyAvatarBitmap = mBitmapHelper.getGrayscaleBitmap(bitmap);
                 return greyAvatarBitmap;
             }
@@ -238,34 +249,64 @@ public class MapService {
         };
     }
 
-    // setup beacon zones
+    // ============================== setup beacon zones ======================================
+
     public Subscription createBeaconZoneObservable(ImageView mapImageView, Map<Integer, PandaBeacon> beacons,
-                                                   Subscriber<GridLayout> subscriber) {
+//                                                   Subscriber<GridLayout> subscriber) {
+                                                   Subscriber<LinearLayout> subscriber) {
         initMapStartPoint(mapImageView);
         initLayoutBuilder();
-        return Observable.create(getBeaconZoneOnSubscribe(beacons))
+        return Observable.create(getBeaconZoneOnSubscriber(beacons))
+                .map(getAddTitleToLayoutOperation())
+                .map(getAddGridLayoutToLayoutOperation())
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(subscriber);
     }
 
-    private Observable.OnSubscribe<GridLayout> getBeaconZoneOnSubscribe(final Map<Integer, PandaBeacon> beacons) {
-        return new Observable.OnSubscribe<GridLayout>() {
+    private Observable.OnSubscribe<LinearLayout> getBeaconZoneOnSubscriber(final Map<Integer, PandaBeacon> beaconMap) {
+        return  new Observable.OnSubscribe<LinearLayout>() {
             @Override
-            public void call(Subscriber<? super GridLayout> subscriber) {
-                for (Map.Entry<Integer, PandaBeacon> entry : beacons.entrySet()) {
+            public void call(Subscriber<? super LinearLayout> subscriber) {
+                for (Map.Entry<Integer, PandaBeacon> entry : beaconMap.entrySet()) {
                     PandaBeacon beacon = entry.getValue();
-                    GridLayout gridLayout = mLayoutBuilder
-                            .getGridLayoutWithRelativeLayoutParams(beacon, mMapStartPoint);
-                    gridLayout.setTag(entry.getKey());
-                    subscriber.onNext(gridLayout);
+                    LinearLayout layout = mLayoutBuilder
+                            .getLinearLayoutWithRelativeLayoutParams(beacon, mMapStartPoint);
+                    layout.setTag(entry.getKey());
+                    subscriber.onNext(layout);
                 }
                 subscriber.onCompleted();
             }
         };
     }
 
-    // setup markers on map
+    private Func1<LinearLayout, LinearLayout> getAddTitleToLayoutOperation() {
+        return new Func1<LinearLayout, LinearLayout>() {
+            @Override
+            public LinearLayout call(LinearLayout layout) {
+                int beaconId = (int) layout.getTag();
+                TextView title = mViewBuilder.getZoneTitleTextView(beaconId);
+                layout.addView(title);
+                return layout;
+            }
+        };
+    }
+
+    private Func1<LinearLayout, LinearLayout> getAddGridLayoutToLayoutOperation() {
+        return new Func1<LinearLayout, LinearLayout>() {
+            @Override
+            public LinearLayout call(LinearLayout layout) {
+                GridLayout gridLayout = mLayoutBuilder.getGridLayoutWithLinearLayoutParams();
+                gridLayout.setTag(layout.getTag());
+                layout.addView(gridLayout);
+                return layout;
+            }
+        };
+    }
+
+
+    // ================================ setup markers on map ====================================
+
     public Subscription createCustomerMarkerOnMapObservable(List<Customer> customers,
                                                             Map<String, CustomerMarker> customerMarkers,
                                                             List<GridLayout> beaconZoneLayouts,
@@ -320,7 +361,28 @@ public class MapService {
                     float heightMargin = params.height - mMarkerSize * gridLayout.getRowCount();
                     heightMargin /= gridLayout.getRowCount() + 1;
 
+//                    TextView zoneTitle = mViewBuilder.getZoneTitleTextView(beaconIdTag);
+//                    GridLayout.LayoutParams param =new GridLayout.LayoutParams();
+//                    param.height = GridLayout.LayoutParams.MATCH_PARENT;
+//                    param.width = GridLayout.LayoutParams.MATCH_PARENT;
+//                    param.setGravity(Gravity.CENTER);
+//                    param.columnSpec = GridLayout.spec(0, gridLayout.getColumnCount());
+//                    param.rowSpec = GridLayout.spec(0);
+//                    zoneTitle.setLayoutParams(param);
+//                    gridLayout.addView(zoneTitle);
+
                     for (int row = 0; row < gridLayout.getRowCount(); row++) {
+//                        if (row == 0) {
+//                            TextView zoneTitle = mViewBuilder.getZoneTitleTextView(beaconIdTag);
+//                            GridLayout.LayoutParams param = new GridLayout.LayoutParams();
+//                            param.height = GridLayout.LayoutParams.MATCH_PARENT;
+//                            param.width = GridLayout.LayoutParams.MATCH_PARENT;
+//                            param.setGravity(Gravity.CENTER);
+//                            param.columnSpec = GridLayout.spec(0, gridLayout.getColumnCount());
+//                            param.rowSpec = GridLayout.spec(0);
+//                            zoneTitle.setLayoutParams(param);
+//                            gridLayout.addView(zoneTitle);
+//                        }
 
                         for (int column = 0; column < gridLayout.getColumnCount(); column++) {
 

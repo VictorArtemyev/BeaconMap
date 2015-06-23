@@ -14,13 +14,12 @@ import com.vitman.rxRealm.altbeacon_map.app.R;
  */
 public class ViewBuilder {
     private Context mContext;
-    private BitmapHelper mBitmapHelper;
 
     public ViewBuilder(Context context) {
         mContext = context;
     }
 
-   public TextView getZoneTitleTextView(int beaconId) {
+    public TextView getZoneTitleTextView(int beaconId) {
         TextView textView = new TextView(mContext);
         textView.setText("Zone " + beaconId);
         textView.setTextColor(Color.parseColor(mContext.getString(R.color.pink)));
@@ -34,7 +33,6 @@ public class ViewBuilder {
         textView.setTextColor(Color.BLACK);
         textView.setGravity(Gravity.CENTER | Gravity.TOP);
         textView.setText("+" + customerNumber + " more");
-        textView.setBackgroundColor(Color.BLUE);
         textView.setTextSize(mContext.getResources().getDimension(R.dimen.text_size));
         return textView;
     }

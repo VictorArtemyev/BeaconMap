@@ -18,6 +18,8 @@ import static android.widget.GridLayout.spec;
 /**
  * Created by Victor Artemjev on 15.06.2015.
  */
+
+//TODO: refactor
 public class LayoutBuilder {
     private Context mContext;
     private double mScale;
@@ -70,8 +72,18 @@ public class LayoutBuilder {
         return gridLayout;
     }
 
-    public GridLayout getGridLayoutWithLinearLayoutParams(PandaBeacon beacon) {
+    public GridLayout getGridLayoutWithLinearLayoutParams() {
         GridLayout gridLayout = new GridLayout(mContext);
+        LinearLayout.LayoutParams params = new LinearLayout
+                .LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        gridLayout.setLayoutParams(params);
+
+        gridLayout.setBackgroundColor(Color.argb(100, 0, 0, 255));
+        return gridLayout;
+    }
+
+    public LinearLayout getLinearLayoutWithRelativeLayoutParams(PandaBeacon beacon, Point startPoint) {
+        LinearLayout layout = new LinearLayout(mContext);
 
         ClubRoom room = beacon.getClubRoom();
 
@@ -100,20 +112,12 @@ public class LayoutBuilder {
         beaconRect.right = Math.min((int) convertValueToView(beacon.getX() + beacon.getStrenght()), roomRect.right);
         beaconRect.bottom = Math.min((int) convertValueToView(beacon.getY() + beacon.getStrenght()), roomRect.bottom);
 
-
-        LinearLayout.LayoutParams params = new LinearLayout
-                .LayoutParams(beaconRect.right - beaconRect.left, beaconRect.bottom - beaconRect.top);
-        gridLayout.setLayoutParams(params);
-
-        gridLayout.setBackgroundColor(Color.argb(100, 0, 0, 255));
-        return gridLayout;
-    }
-
-    public LinearLayout getLinearLayout() {
-        LinearLayout layout = new LinearLayout(mContext);
+        int width = beaconRect.right - beaconRect.left;
+        int height = beaconRect.bottom - beaconRect.top;
         RelativeLayout.LayoutParams params = new RelativeLayout
-                .LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
+                .LayoutParams(width, height);
+        params.leftMargin = beaconRect.left;
+        params.topMargin = beaconRect.top + startPoint.y;
         layout.setLayoutParams(params);
         layout.setOrientation(LinearLayout.VERTICAL);
         return layout;
@@ -133,6 +137,4 @@ public class LayoutBuilder {
     private double convertValueToView(double value) {
         return (value * mScale * 100); //Floor scale
     }
-
-
 }

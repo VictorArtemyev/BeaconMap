@@ -1,4 +1,4 @@
-package com.vitman.rxRealm.altbeacon_map.app;
+package com.vitman.rxRealm.altbeacon_map.app.app;
 
 import android.app.Application;
 import org.altbeacon.beacon.BeaconManager;
