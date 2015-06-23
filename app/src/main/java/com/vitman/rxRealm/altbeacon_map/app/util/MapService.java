@@ -8,7 +8,11 @@ import android.graphics.Point;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
-import android.widget.*;
+import android.view.Gravity;
+import android.widget.GridLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import com.vitman.rxRealm.altbeacon_map.app.R;
 import com.vitman.rxRealm.altbeacon_map.app.entity.Customer;
 import com.vitman.rxRealm.altbeacon_map.app.entity.CustomerMarker;
@@ -48,7 +52,6 @@ public class MapService {
     private BitmapHelper mBitmapHelper;
     private ViewBuilder mViewBuilder;
     private LayoutBuilder mLayoutBuilder;
-
 
 
     public MapService(Activity activity) {
@@ -136,7 +139,6 @@ public class MapService {
     }
 
 
-
     // ===================== create and setup map =============================
 
     public Subscription createMapBitmapObservable(int resourceId,
@@ -189,66 +191,6 @@ public class MapService {
         };
     }
 
-    // ==================== produce customer markers ======================================
-
-    public Subscription createCustomerMarkerProducerObservable(List<Customer> customers,
-                                                               Subscriber<CustomerMarker> subscriber) {
-        return Observable.from(customers)
-                .flatMap(getCustomerMarkersOperation())
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(subscriber);
-    }
-
-    private Func1<Customer, Observable<CustomerMarker>> getCustomerMarkersOperation() {
-        return new Func1<Customer, Observable<CustomerMarker>>() {
-            @Override
-            public Observable<CustomerMarker> call(Customer customer) {
-                return Observable
-                        .zip(getCustomerMarkerBitmapObservable(customer),
-                                Observable.just(customer),
-                                getCustomerMarkerZipOperation());
-            }
-        };
-    }
-
-    private Observable<Bitmap> getCustomerMarkerBitmapObservable(final Customer customer) {
-        return Observable.create(new Observable.OnSubscribe<Bitmap>() {
-            @Override
-            public void call(Subscriber<? super Bitmap> subscriber) {
-                String customerAvatarUrl = customer.getAvatarUrl();
-                Log.e(LOG_TAG, customerAvatarUrl);
-                Bitmap avatarBitmap = mBitmapHelper.getBitmapFromURL(customerAvatarUrl);
-                if(avatarBitmap != null) {
-                    subscriber.onNext(avatarBitmap);
-                }
-            }
-        }).map(new Func1<Bitmap, Bitmap>() {
-            @Override
-            public Bitmap call(Bitmap bitmap) {
-                if (bitmap == null) {
-                    return BitmapFactory.decodeResource(Resources.getSystem(), R.drawable.map);
-                }
-                Bitmap greyAvatarBitmap = mBitmapHelper.getGrayscaleBitmap(bitmap);
-                return greyAvatarBitmap;
-            }
-        });
-    }
-
-    private Func2<Bitmap, Customer, CustomerMarker> getCustomerMarkerZipOperation() {
-        return new Func2<Bitmap, Customer, CustomerMarker>() {
-            @Override
-            public CustomerMarker call(Bitmap bitmap, Customer customer) {
-                String customerId = customer.getUserId();
-                Integer beaconId = customer.getBeaconId();
-                ImageView marker = mViewBuilder
-                        .getMarker(bitmap, customerId, mMarkerSize);
-                marker.setTag(beaconId);
-                return new CustomerMarker(customerId, beaconId, marker);
-            }
-        };
-    }
-
     // ============================== setup beacon zones ======================================
 
     public Subscription createBeaconZoneObservable(ImageView mapImageView, Map<Integer, PandaBeacon> beacons,
@@ -259,13 +201,12 @@ public class MapService {
         return Observable.create(getBeaconZoneOnSubscriber(beacons))
                 .map(getAddTitleToLayoutOperation())
                 .map(getAddGridLayoutToLayoutOperation())
-                .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(subscriber);
     }
 
     private Observable.OnSubscribe<LinearLayout> getBeaconZoneOnSubscriber(final Map<Integer, PandaBeacon> beaconMap) {
-        return  new Observable.OnSubscribe<LinearLayout>() {
+        return new Observable.OnSubscribe<LinearLayout>() {
             @Override
             public void call(Subscriber<? super LinearLayout> subscriber) {
                 for (Map.Entry<Integer, PandaBeacon> entry : beaconMap.entrySet()) {
@@ -304,6 +245,66 @@ public class MapService {
         };
     }
 
+    // ==================== produce customer markers ======================================
+
+    public Subscription createCustomerMarkerProducerObservable(List<Customer> customers,
+                                                               Subscriber<CustomerMarker> subscriber) {
+        return Observable.from(customers)
+                .flatMap(getCustomerMarkersOperation())
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(subscriber);
+    }
+
+    private Func1<Customer, Observable<CustomerMarker>> getCustomerMarkersOperation() {
+        return new Func1<Customer, Observable<CustomerMarker>>() {
+            @Override
+            public Observable<CustomerMarker> call(Customer customer) {
+                return Observable
+                        .zip(getCustomerMarkerBitmapObservable(customer),
+                                Observable.just(customer),
+                                getCustomerMarkerZipOperation());
+            }
+        };
+    }
+
+    private Observable<Bitmap> getCustomerMarkerBitmapObservable(final Customer customer) {
+        return Observable.create(new Observable.OnSubscribe<Bitmap>() {
+            @Override
+            public void call(Subscriber<? super Bitmap> subscriber) {
+                String customerAvatarUrl = customer.getAvatarUrl();
+                Log.e(LOG_TAG, customerAvatarUrl);
+                Bitmap avatarBitmap = mBitmapHelper.getBitmapFromURL(customerAvatarUrl);
+                if (avatarBitmap != null) {
+                    subscriber.onNext(avatarBitmap);
+                }
+            }
+        }).map(new Func1<Bitmap, Bitmap>() {
+            @Override
+            public Bitmap call(Bitmap bitmap) {
+                if (bitmap == null) {
+                    return BitmapFactory.decodeResource(Resources.getSystem(), R.drawable.map);
+                }
+                Bitmap greyAvatarBitmap = mBitmapHelper.getGreyscaleBitmap(bitmap);
+                return greyAvatarBitmap;
+            }
+        });
+    }
+
+    private Func2<Bitmap, Customer, CustomerMarker> getCustomerMarkerZipOperation() {
+        return new Func2<Bitmap, Customer, CustomerMarker>() {
+            @Override
+            public CustomerMarker call(Bitmap bitmap, Customer customer) {
+                String customerId = customer.getUserId();
+                Integer beaconId = customer.getBeaconId();
+                ImageView marker = mViewBuilder
+                        .getMarker(bitmap, customerId, mMarkerSize);
+                marker.setTag(beaconId);
+                return new CustomerMarker(customerId, beaconId, marker);
+            }
+        };
+    }
+
 
     // ================================ setup markers on map ====================================
 
@@ -312,15 +313,13 @@ public class MapService {
                                                             List<GridLayout> beaconZoneLayouts,
                                                             Subscriber<GridLayout> subscriber) {
         return Observable.create(getMarkerOnMapOnSubscribe(customers, customerMarkers, beaconZoneLayouts))
-
-                .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(subscriber);
     }
 
-    public Observable.OnSubscribe<GridLayout> getMarkerOnMapOnSubscribe(final List<Customer> allCustomers,
-                                                                        final Map<String, CustomerMarker> customerMarkers,
-                                                                        final List<GridLayout> beaconZoneLayouts) {
+    public Observable.OnSubscribe<GridLayout> getMarkerOnMapOnSubscribe(final List<Customer> customers,
+                                                                          final Map<String, CustomerMarker> customerMarkers,
+                                                                          final List<GridLayout> beaconZoneLayouts) {
         return new Observable.OnSubscribe<GridLayout>() {
             @Override
             public void call(Subscriber<? super GridLayout> subscriber) {
@@ -329,82 +328,71 @@ public class MapService {
 
                     int beaconIdTag = (int) gridLayout.getTag();
 
-                    List<Customer> customers = new ArrayList<>();
-                    for (Customer customer : allCustomers) {
+                    List<Customer> customersByZone = new ArrayList<>();
+                    for (Customer customer : customers) {
                         if (customer.getBeaconId() == beaconIdTag) {
-                            customers.add(customer);
+                            customersByZone.add(customer);
                             if (customer.getUserId().equals("current_user_id")) {
-                                Collections.swap(customers, 0, customers.size() - 1);
+                                Collections.swap(customersByZone, 0, customersByZone.size() - 1);
                             }
                         }
                     }
 
-                    RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) gridLayout.getLayoutParams();
-                    int columnCount = params.width / mMarkerSize;
-                    int rowCount = params.height / mMarkerSize;
+                    int layoutWidth = gridLayout.getWidth();
+                    int layoutHeight = gridLayout.getHeight();
+
+                    int columnCount = layoutWidth / mMarkerSize;
+                    int rowCount = layoutHeight / mMarkerSize;
+
                     gridLayout.setColumnCount(columnCount);
                     gridLayout.setRowCount(rowCount);
 
-                    if (gridLayout.getColumnCount() > customers.size()) {
-                        gridLayout.setColumnCount(customers.size());
-                        gridLayout.setRowCount(1);
+                    if (gridLayout.getColumnCount() > customersByZone.size()) {
+                        gridLayout.setColumnCount(customersByZone.size());
+                        gridLayout.setRowCount(2);
                     }
 
                     if (gridLayout.getColumnCount() != 0 &&
-                            gridLayout.getRowCount() > customers.size() / gridLayout.getColumnCount()) {
-                        gridLayout.setRowCount((int) Math.ceil((double) customers.size() / gridLayout.getColumnCount()));
+                            gridLayout.getRowCount() > customersByZone.size() / gridLayout.getColumnCount()) {
+                        rowCount = (int) Math.ceil((double) customersByZone.size() / gridLayout.getColumnCount());
+                        gridLayout.setRowCount(rowCount);
                     }
 
-                    float widthMargin = params.width - mMarkerSize * gridLayout.getColumnCount();
+                    float widthMargin = layoutWidth - mMarkerSize * gridLayout.getColumnCount();
                     widthMargin /= gridLayout.getColumnCount() + 1;
 
-                    float heightMargin = params.height - mMarkerSize * gridLayout.getRowCount();
+                    float heightMargin = layoutHeight - mMarkerSize * gridLayout.getRowCount();
                     heightMargin /= gridLayout.getRowCount() + 1;
 
-//                    TextView zoneTitle = mViewBuilder.getZoneTitleTextView(beaconIdTag);
-//                    GridLayout.LayoutParams param =new GridLayout.LayoutParams();
-//                    param.height = GridLayout.LayoutParams.MATCH_PARENT;
-//                    param.width = GridLayout.LayoutParams.MATCH_PARENT;
-//                    param.setGravity(Gravity.CENTER);
-//                    param.columnSpec = GridLayout.spec(0, gridLayout.getColumnCount());
-//                    param.rowSpec = GridLayout.spec(0);
-//                    zoneTitle.setLayoutParams(param);
-//                    gridLayout.addView(zoneTitle);
+                    int customerCapacity = gridLayout.getRowCount() * gridLayout.getColumnCount();
+                    int customerRemains = 0;
+                    if (customersByZone.size() > customerCapacity) {
+                        customerRemains = customersByZone.size() - customerCapacity;
+                        customerRemains += gridLayout.getColumnCount();
+                    }
+
+                    Log.e(LOG_TAG, "tag - " + gridLayout.getTag()
+                            + " capacity - " + customerCapacity + " customer remains - " + customerRemains);
 
                     for (int row = 0; row < gridLayout.getRowCount(); row++) {
-//                        if (row == 0) {
-//                            TextView zoneTitle = mViewBuilder.getZoneTitleTextView(beaconIdTag);
-//                            GridLayout.LayoutParams param = new GridLayout.LayoutParams();
-//                            param.height = GridLayout.LayoutParams.MATCH_PARENT;
-//                            param.width = GridLayout.LayoutParams.MATCH_PARENT;
-//                            param.setGravity(Gravity.CENTER);
-//                            param.columnSpec = GridLayout.spec(0, gridLayout.getColumnCount());
-//                            param.rowSpec = GridLayout.spec(0);
-//                            zoneTitle.setLayoutParams(param);
-//                            gridLayout.addView(zoneTitle);
-//                        }
-
+                        if (row == gridLayout.getRowCount() - 1 && customerRemains > 0) {
+                            TextView textView = new ViewBuilder(mActivity)
+                                    .getCustomerRemainsTextView(customerRemains);
+                            GridLayout.LayoutParams param =new GridLayout.LayoutParams();
+                            param.height = GridLayout.LayoutParams.MATCH_PARENT;
+                            param.width = GridLayout.LayoutParams.MATCH_PARENT;
+                            param.setGravity(Gravity.CENTER);
+                            param.columnSpec = GridLayout.spec(0, gridLayout.getColumnCount());
+                            param.rowSpec = GridLayout.spec(row);
+                            textView.setLayoutParams(param);
+                            gridLayout.addView(textView);
+                            break;
+                        }
                         for (int column = 0; column < gridLayout.getColumnCount(); column++) {
-
-                            int customerRemains = customers.size() - gridLayout.getChildCount();
-//                        if (row + 1 == gridLayout.getRowCount() && customerRemains > 0) {
-//                            TextView textView = mViewBuilder.getCustomerRemainsTextView(customerRemains);
-//
-//                            GridLayout.LayoutParams param =new GridLayout.LayoutParams();
-//                            param.height = GridLayout.LayoutParams.MATCH_PARENT;
-//                            param.width = GridLayout.LayoutParams.MATCH_PARENT;
-//                            param.setGravity(Gravity.CENTER);
-//                            param.columnSpec = GridLayout.spec(column, gridLayout.getColumnCount());
-//                            param.rowSpec = GridLayout.spec(row);
-//                            textView.setLayoutParams(param);
-//                            gridLayout.addView(textView);
-//                            break;
-//                        }
-
-                            int item = row * gridLayout.getColumnCount() + column;
+                            int item = (row) * gridLayout.getColumnCount() + column;
                             Log.e("User", item + " " + gridLayout.getTag());
-                            if (customers.size() > item) {
-                                Customer customer = customers.get(item);
+                            if (customersByZone.size() > item) {
+                                Customer customer = customersByZone.get(item);
 
                                 ImageView marker = customerMarkers.get(customer.getUserId()).getMarker();
                                 if (marker != null) {
@@ -428,10 +416,8 @@ public class MapService {
                             }
                         }
                     }
-                    Log.e(LOG_TAG, "Layout child count - " + gridLayout.getChildCount());
                     subscriber.onNext(gridLayout);
                 }
-
             }
         };
     }

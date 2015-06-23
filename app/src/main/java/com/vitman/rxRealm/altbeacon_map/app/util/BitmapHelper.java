@@ -32,8 +32,9 @@ public class BitmapHelper {
         return Bitmap.createScaledBitmap(b, width, (int) (b.getHeight() * factor), true);
     }
 
-    public Bitmap getGrayscaleBitmap(Bitmap bitmap) {
-        int width, height;
+    public Bitmap getGreyscaleBitmap(Bitmap bitmap) {
+        int width;
+        int height;
         height = bitmap.getHeight();
         width = bitmap.getWidth();
 

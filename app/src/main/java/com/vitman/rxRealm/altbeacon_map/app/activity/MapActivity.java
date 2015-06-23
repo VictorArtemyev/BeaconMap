@@ -5,23 +5,26 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.widget.*;
+import android.widget.GridLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import com.vitman.rxRealm.altbeacon_map.app.R;
 import com.vitman.rxRealm.altbeacon_map.app.entity.Customer;
 import com.vitman.rxRealm.altbeacon_map.app.entity.CustomerMarker;
 import com.vitman.rxRealm.altbeacon_map.app.entity.DataBase;
 import com.vitman.rxRealm.altbeacon_map.app.entity.PandaBeacon;
 import com.vitman.rxRealm.altbeacon_map.app.layout.TouchRelativeLayout;
-import com.vitman.rxRealm.altbeacon_map.app.util.LayoutBuilder;
 import com.vitman.rxRealm.altbeacon_map.app.util.MapService;
-import com.vitman.rxRealm.altbeacon_map.app.util.ViewBuilder;
 import rx.Subscriber;
 import rx.Subscription;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Victor Artemjev on 18.06.2015.
@@ -115,101 +118,103 @@ public class MapActivity extends AppCompatActivity {
 
     private void setupCustomerMarkersOnMap() {
         clearBeaconZoneLayouts();
-        for (GridLayout gridLayout : mBeaconZoneLayouts) {
-            Log.e(LOG_TAG, "setupCustomerMarkersOnLayoutOperation");
-
-            int beaconIdTag = (int) gridLayout.getTag();
-
-            List<Customer> customersByZone = new ArrayList<>();
-            for (Customer customer : mCustomers) {
-                if (customer.getBeaconId() == beaconIdTag) {
-                    customersByZone.add(customer);
-                    if (customer.getUserId().equals("current_user_id")) {
-                        Collections.swap(customersByZone, 0, customersByZone.size() - 1);
-                    }
-                }
-            }
-            int mMarkerSize = (int) (mMapService.getCurrentMapWidth() / 14);
-            int layoutWidth = gridLayout.getWidth();
-            int layoutHeight = gridLayout.getHeight();
-
-            int columnCount = layoutWidth / mMarkerSize;
-            int rowCount = layoutHeight / mMarkerSize;
-
-            gridLayout.setColumnCount(columnCount);
-            gridLayout.setRowCount(rowCount);
-
-            if (gridLayout.getColumnCount() > customersByZone.size()) {
-                gridLayout.setColumnCount(customersByZone.size());
-                gridLayout.setRowCount(2);
-            }
-
-            if (gridLayout.getColumnCount() != 0 &&
-                    gridLayout.getRowCount() > customersByZone.size() / gridLayout.getColumnCount()) {
-                rowCount = (int) Math.ceil((double) customersByZone.size() / gridLayout.getColumnCount());
-                gridLayout.setRowCount(rowCount);
-            }
-
-            float widthMargin = layoutWidth - mMarkerSize * gridLayout.getColumnCount();
-            widthMargin /= gridLayout.getColumnCount() + 1;
-
-            float heightMargin = layoutHeight - mMarkerSize * gridLayout.getRowCount();
-            heightMargin /= gridLayout.getRowCount() + 1;
-
-            int customerCapacity = gridLayout.getRowCount() * gridLayout.getColumnCount();
-            int customerRemains = 0;
-            if (customersByZone.size() > customerCapacity) {
-                customerRemains = customersByZone.size() - customerCapacity;
-                customerRemains += gridLayout.getColumnCount();
-            }
-
-            Log.e(LOG_TAG, "tag - " + gridLayout.getTag()
-                    + " capacity - " + customerCapacity + " customer remains - " + customerRemains);
-
-            for (int row = 0; row < gridLayout.getRowCount(); row++) {
-                if (row == gridLayout.getRowCount() - 1 && customerRemains > 0) {
-                    TextView textView = new ViewBuilder(MapActivity.this)
-                            .getCustomerRemainsTextView(customerRemains);
-                    GridLayout.LayoutParams param =new GridLayout.LayoutParams();
-                    param.height = GridLayout.LayoutParams.MATCH_PARENT;
-                    param.width = GridLayout.LayoutParams.MATCH_PARENT;
-                    param.setGravity(Gravity.CENTER);
-                    param.columnSpec = GridLayout.spec(0, gridLayout.getColumnCount());
-                    param.rowSpec = GridLayout.spec(row);
-                    textView.setLayoutParams(param);
-                    gridLayout.addView(textView);
-                    break;
-                }
-                for (int column = 0; column < gridLayout.getColumnCount(); column++) {
-                    int item = (row) * gridLayout.getColumnCount() + column;
-                    Log.e("User", item + " " + gridLayout.getTag());
-                    if (customersByZone.size() > item) {
-                        Customer customer = customersByZone.get(item);
-
-                        ImageView marker = mCustomerMarkers.get(customer.getUserId()).getMarker();
-                        if (marker != null) {
-                            GridLayout.LayoutParams markerParams = LayoutBuilder
-                                    .getGridLayoutParamForMarker(mMarkerSize,
-                                            mMarkerSize, column, row);
-                            markerParams.leftMargin = column > 0 ?
-                                    (int) widthMargin / 2 : (int) widthMargin;
-
-                            markerParams.rightMargin = column < gridLayout.getColumnCount() - 1 ?
-                                    (int) widthMargin / 2 : (int) widthMargin;
-
-                            markerParams.topMargin = row > 0 ?
-                                    (int) heightMargin / 2 : (int) heightMargin;
-
-                            markerParams.bottomMargin = row < gridLayout.getRowCount() - 1 ?
-                                    (int) heightMargin / 2 : (int) heightMargin;
-                            marker.setLayoutParams(markerParams);
-                            gridLayout.addView(marker);
-                        }
-                    }
-                }
-            }
-            gridLayout.invalidate();
-        }
+        Subscription subscription = mMapService.createCustomerMarkerOnMapObservable(mCustomers,
+                mCustomerMarkers, mBeaconZoneLayouts, mMarkersOnMapSubscriber);
+//        for (GridLayout gridLayout : mBeaconZoneLayouts) {
+//            Log.e(LOG_TAG, "setupCustomerMarkersOnLayoutOperation");
+//
+//            int beaconIdTag = (int) gridLayout.getTag();
+//
+//            List<Customer> customersByZone = new ArrayList<>();
+//            for (Customer customer : mCustomers) {
+//                if (customer.getBeaconId() == beaconIdTag) {
+//                    customersByZone.add(customer);
+//                    if (customer.getUserId().equals("current_user_id")) {
+//                        Collections.swap(customersByZone, 0, customersByZone.size() - 1);
+//                    }
+//                }
+//            }
+//            int mMarkerSize = (int) (mMapService.getCurrentMapWidth() / 14);
+//            int layoutWidth = gridLayout.getWidth();
+//            int layoutHeight = gridLayout.getHeight();
+//
+//            int columnCount = layoutWidth / mMarkerSize;
+//            int rowCount = layoutHeight / mMarkerSize;
+//
+//            gridLayout.setColumnCount(columnCount);
+//            gridLayout.setRowCount(rowCount);
+//
+//            if (gridLayout.getColumnCount() > customersByZone.size()) {
+//                gridLayout.setColumnCount(customersByZone.size());
+//                gridLayout.setRowCount(2);
+//            }
+//
+//            if (gridLayout.getColumnCount() != 0 &&
+//                    gridLayout.getRowCount() > customersByZone.size() / gridLayout.getColumnCount()) {
+//                rowCount = (int) Math.ceil((double) customersByZone.size() / gridLayout.getColumnCount());
+//                gridLayout.setRowCount(rowCount);
+//            }
+//
+//            float widthMargin = layoutWidth - mMarkerSize * gridLayout.getColumnCount();
+//            widthMargin /= gridLayout.getColumnCount() + 1;
+//
+//            float heightMargin = layoutHeight - mMarkerSize * gridLayout.getRowCount();
+//            heightMargin /= gridLayout.getRowCount() + 1;
+//
+//            int customerCapacity = gridLayout.getRowCount() * gridLayout.getColumnCount();
+//            int customerRemains = 0;
+//            if (customersByZone.size() > customerCapacity) {
+//                customerRemains = customersByZone.size() - customerCapacity;
+//                customerRemains += gridLayout.getColumnCount();
+//            }
+//
+//            Log.e(LOG_TAG, "tag - " + gridLayout.getTag()
+//                    + " capacity - " + customerCapacity + " customer remains - " + customerRemains);
+//
+//            for (int row = 0; row < gridLayout.getRowCount(); row++) {
+//                if (row == gridLayout.getRowCount() - 1 && customerRemains > 0) {
+//                    TextView textView = new ViewBuilder(MapActivity.this)
+//                            .getCustomerRemainsTextView(customerRemains);
+//                    GridLayout.LayoutParams param =new GridLayout.LayoutParams();
+//                    param.height = GridLayout.LayoutParams.MATCH_PARENT;
+//                    param.width = GridLayout.LayoutParams.MATCH_PARENT;
+//                    param.setGravity(Gravity.CENTER);
+//                    param.columnSpec = GridLayout.spec(0, gridLayout.getColumnCount());
+//                    param.rowSpec = GridLayout.spec(row);
+//                    textView.setLayoutParams(param);
+//                    gridLayout.addView(textView);
+//                    break;
+//                }
+//                for (int column = 0; column < gridLayout.getColumnCount(); column++) {
+//                    int item = (row) * gridLayout.getColumnCount() + column;
+//                    Log.e("User", item + " " + gridLayout.getTag());
+//                    if (customersByZone.size() > item) {
+//                        Customer customer = customersByZone.get(item);
+//
+//                        ImageView marker = mCustomerMarkers.get(customer.getUserId()).getMarker();
+//                        if (marker != null) {
+//                            GridLayout.LayoutParams markerParams = LayoutBuilder
+//                                    .getGridLayoutParamForMarker(mMarkerSize,
+//                                            mMarkerSize, column, row);
+//                            markerParams.leftMargin = column > 0 ?
+//                                    (int) widthMargin / 2 : (int) widthMargin;
+//
+//                            markerParams.rightMargin = column < gridLayout.getColumnCount() - 1 ?
+//                                    (int) widthMargin / 2 : (int) widthMargin;
+//
+//                            markerParams.topMargin = row > 0 ?
+//                                    (int) heightMargin / 2 : (int) heightMargin;
+//
+//                            markerParams.bottomMargin = row < gridLayout.getRowCount() - 1 ?
+//                                    (int) heightMargin / 2 : (int) heightMargin;
+//                            marker.setLayoutParams(markerParams);
+//                            gridLayout.addView(marker);
+//                        }
+//                    }
+//                }
+//            }
+//            gridLayout.invalidate();
+//        }
     }
 
     private Subscriber<Bitmap> mMapSubscriber = new Subscriber<Bitmap>() {
@@ -264,7 +269,6 @@ public class MapActivity extends AppCompatActivity {
     private Subscriber<LinearLayout> mBeaconZoneSubscriber = new Subscriber<LinearLayout>() {
         @Override
         public void onCompleted() {
-//            setupCustomerMarkersOnMap();
             produceCustomerMarkers();
         }
 
@@ -285,13 +289,7 @@ public class MapActivity extends AppCompatActivity {
     private Subscriber<GridLayout> mMarkersOnMapSubscriber = new Subscriber<GridLayout>() {
         @Override
         public void onCompleted() {
-            Log.e(LOG_TAG, "on completed - mMarkersOnMapSubscriber");
-            Log.e(LOG_TAG, mBeaconZoneLayouts.size() + "");
-            for (GridLayout layout : mBeaconZoneLayouts) {
-                if (layout != null) {
-                    Log.e(LOG_TAG, layout.getChildCount() + "");
-                }
-            }
+            Log.e(LOG_TAG, "Done!");
         }
 
         @Override
@@ -303,7 +301,7 @@ public class MapActivity extends AppCompatActivity {
         @Override
         public void onNext(GridLayout gridLayout) {
             gridLayout.invalidate();
-            Log.e(LOG_TAG, "invalidate");
+            Log.e(LOG_TAG, " Map - invalidate!");
         }
     };
 }
